@@ -94,7 +94,8 @@ GDB: handle SIG33 nostop noprint pass
 * Export doesn't work without JACK client
 
 * put outs in datagen in 'out' hash, like out.out1, with code to be
-  compatible if out was used as an output?
+  compatible if out was used as an output? (if out contains a vector
+  named 'data', use compatibility mode)
 
 * Put filename in Score class and current score in globals.
 

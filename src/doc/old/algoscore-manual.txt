@@ -1,0 +1,424 @@
+:encoding: ISO-8859-1
+
+AlgoScore Users Guide
+=====================
+Jonatan Liljedahl <lijon@kymatica.com>
+:toc:
+:numbered:
+
+include::as_intro.txt[]
+
+Running AlgoScore
+-----------------
+There's no need to 'install' AlgoScore, it's a self-contained application directory.
+
+On Linux, start AlgoScore by running the algoscore binary
+from within the top-level directory of the AlgoScore folder.
+If you're using http://rox.sf.net[ROX-Filer], you should be able to start AlgoScore by just
+double-clicking it, and it will try to compile itself if no binary existed
+already.
+
+On Mac OS X, the simplest approach is probably to download the pre-built
+AlgoScore.app application bundle. Make sure you have X11, JackOSX, and CsoundLib framework and it's SupportLibs package
+installed.
+
+There's currently no binary packages for Linux.
+
+Download
+~~~~~~~~
+Sourcecode and packages can be downloaded at http://kymatica.com/algoscore[]
+
+Building from source
+~~~~~~~~~~~~~~~~~~~~
+To compile AlgoScore from source, follow these general steps: (this should "just work"
+on Linux if all dependencies are installed)
+
+-------
+$ cd AlgoScore/src
+$ ./configure
+$ make
+-------
+
+Dependencies
+~~~~~~~~~~~~
+- JACK 0.100.0 (0.102.27 or later for MIDI support)
+- Csound 5
+- libsndfile 1
+- GTK+ 2.8
+- GLib 2.12
+
+If any of the dependencies are installed in a non-standard location, you need to
+use something like this:
+
+------
+$ ./configure CPPFLAGS="-I/path/to/headers" LDFLAGS="-L/path/to/library"
+------
+
+If CSound is not found by the `configure` script then csound support will not be
+included in the build.
+
+JACK is also needed for audio and midi playback. Future versions will compile without JACK but
+with playback disabled.
+
+Building on Mac OS X
+^^^^^^^^^^^^^^^^^^^^
+Install the following packages:
+
+- XCodeTools
+- X11
+- MacPorts
+- CsoundLib (framework and supportlibs)
+- Jack (framework)
+
+Then open up a Terminal and use `sudo port install <package>` to install:
+
+- gtk2 (this will take a couple of hours)
+- libsndfile
+
+If the `port` command could not be found, it might be because 
+some versions of MacPorts fails to set up your shell variables, try this in a Terminal
+to fix it: (note the use of backticks)
+---------
+$ `find /opt/local | grep -m 1 postflight`
+---------
+If this succeeded, restart Terminal for the new variables to take effect.
+
+Now enter the unpacked AlgoScore folder:
+-----------
+$ cd AlgoScore/src
+-----------
+
+If Jack is installed as a native OS X framework, you need to tell the configure
+script what version of Jack you're using:
+
+For 0.105.0 or later:
+---------
+$ ./configure HAVE_STABLE_JACK_MIDI=yes
+---------
+
+For 0.102.27 to 0.104.0:
+---------
+$ ./configure HAVE_OLD_JACK_MIDI=yes
+---------
+
+If you have an older Jack, don't pass any variable and MIDI support will be
+disabled.
+
+Now simply do:
+----------
+$ make
+----------
+
+If the build succeeded without errors you should be able to start AlgoScore:
+start Jack, launch X11 and in the terminal that shows up do this:
+----------
+$ cd AlgoScore
+$ ./algoscore
+----------
+
+To create a stand-alone application bundle:
+----------
+$ cd AlgoScore/macosx
+$ make
+----------
+
+Note that you need to manually connect each created csoundbus or audiobus
+to your soundcard in the Jack router.
+
+Currently, some actions needs a 3-button mouse to be performed, this is going to change
+so that it will be possible to use on a 1-button Mac.
+
+Getting started
+---------------
+
+Score window
+~~~~~~~~~~~~
+image::score_window.png[]
+This is the main AlgoScore window.
+The white area with the timeline and grids is the (now empty) graphical score.
+
+At the top of the window is the menu where various actions can be performed, like
+opening and saving projects, exporting busses to audio, printing to PDF, etc...
+
+At the bottom of the window is the toolbar. It has buttons to do various actions (some of which
+is also available in the menus), a time display of the current play position, the tool-mode display (here *object*) and
+the zoom-control. Holding the mouse cursor over the buttons shows a tooltip with a description
+of what that button does.
+
+Console
+~~~~~~~
+image::console.png[]
+This is the console. It has a big text area that display info and error messages,
+and a commandline where one has access to the built-in nasal interpreter. This can be used
+for programmatical access to the score and objects, or for trying out nasal expressions, etc...
+The console can be opened with `Alt-L` or the `Windows->Console` menu item.
+
+Create objects
+~~~~~~~~~~~~~~
+image::create_object.png[]
+To create an object, right-click on the score area or press `n`. The above
+window will show up, clicking once on a class in the list shows the description of that class.
+Double-click on the class to create an object of that class.
+
+The objects can then be moved around by dragging them with the left mouse button.
+
+To delete an object, press `delete` or `backspace` while moving the object.
+
+Properties
+~~~~~~~~~~
+image::obj_propbox.png[]
+Pressing `p` while holding the mouse cursor over an object brings up the properties window
+for that object, where you can edit the properties of the object. Pressing `p` over an
+empty score area brings up the properties for the score.
+
+Connections
+~~~~~~~~~~~
+To connect two objects, right-click on the source-object and choose the output, then click
+on the target-object and choose the input.
+
+1: image:connect_1.png[]
+2: image:connect_2.png[]
+3: image:connect_3.png[]
+4: image:connect_4.png[]
+
+The connections can be moved by dragging them with the left mouse button.
+Note that the graphical placement of connections has no meaning other than visually! It's the
+position of the objects themselfes that has meaning.
+
+Connections also has properties, these are accessed by pressing `p` over a
+connection arrow.
+
+Preferences
+~~~~~~~~~~~
+image::preferences.png[]
+This is the main preferences, accessed at `File->Preferences` on the menu.
+They are saved to `.algoscorerc` in your home folder.
+
+Printing
+~~~~~~~~
+image::printbox.png[]
+Pressing `Ctrl-P` or choosing `File->Print to file` on the menu brings
+up the print to file dialog. AlgoScore can export to PDF, PostScript or SVG which can then
+be published on the web or printed to paper with another application.
+Title, subtitle and composer can be set with the score properties.
+
+Using Csound
+~~~~~~~~~~~~
+AlgoScore can use Csound to produce sound which can be played back through JACK or
+exported to audiofile. It interfaces to Csound through the `csound_bus` object.
+Each `csound_bus` object is an instance of Csound.
+
+Orchestra
+^^^^^^^^^
+After you created a `csound_bus` you should give it an orchestra file. This is done by setting
+the `orc_file` property on the bus. You need to use an external editor to create and edit
+the orchestra file. The csound orchestra syntax is beyond the scope of this manual, see
+http://www.csounds.com[] for tutorials and more information on Csound.
+The orchestra file is searched in the current folder or the folder where the project is
+saved. It's recommended that you start by saving the project in a folder so you know where
+to place the orc file.
+
+If you edit the orchestra file you need to press `u` on the csound bus to make it reload
+the orchestra, since AlgoScore won't know about things you do with an external text editor.
+
+You can set your favorite text editor in the 'Preferences', pressing `e` on the csound bus
+will then bring up the orchestra file of that bus in the editor.
+
+Inlets
+^^^^^^
+The csound bus has inlets for events and ftabs. Also all software channels exported
+from the orchestra by `chnexport` will show up here, allowing k-rate control of global
+variables in the orchestra.
+
+You can use `cs_instr` or `cs_instr_graph` to send single instrument events, or use
+nasal code in `datagen` object to generate them algorithmically.
+
+Instrument event data are in the form `[p1, p3, ...]`.
+p2 (start time) is skipped since it's already in the AlgoScore event.
+
+Jack ports
+^^^^^^^^^^
+Each csound bus will create a corresponding JACK output port for each channel (as defined
+by `nchnls` in the orchestra). AlgoScore will try to autoconnect these ports to the default
+soundcard of the system. This might not work on OS X, then you need to manually connect
+them in the JACK router.
+
+Currently, the samplerate of csound (`sr` in the orchestra) *must* be the same as JACK!
+
+Rendering and export
+^^^^^^^^^^^^^^^^^^^^
+Each change that affects the csound bus will make it start rendering audio, this is
+visualized by a red transparent bar. You can start playing the audio before it has finished,
+but if the play position reaches the non-rendered area of the bus, playback will be silenced.
+
+With a complicated orchestra and many events, rendering can be slow. To avoid that each little
+change in the score triggers the rendering, you can set the `delay_update` property to 1.
+You can now make multiple changes, and press `Ctrl-U` to update all objects that are waiting for
+an update, or `u` on a single object to update only that one. All objects in need of update
+will be seen with the transparent red bar.
+
+image::export_audio.png[]
+To export a csound bus to an audiofile, choose `File->export bus` on the menu. You can
+then choose the wanted format and encoding, and the filename.
+
+Using MIDI
+~~~~~~~~~~
+todo...
+
+Examples
+~~~~~~~~
+See examples in the `AlgoScore/examples` folder.
+
+csound_test.as
+^^^^^^^^^^^^^^
+image::csound_test.png[]
+This is a simple csound test that demonstrates single event objects and
+control curves connected to a csound bus.
+
+evgen_test.as
+^^^^^^^^^^^^^
+image::evgen_test.png[]
+This is a more advanced example of how nasal code entered in a `datagen` object can be used
+to algorithmically generate events.
+It's connected to an `evgraph` object to visualize the events, and to
+a csound bus for synthesis.
+
+midi_test.as
+^^^^^^^^^^^^
+image::midi_test.png[]
+This is a demonstration of the MIDI bus, in this example note events are generated with
+a `datagen` object and a couple of curve objects makes control change events.
+
+transfunc_aux_test.as
+^^^^^^^^^^^^^^^^^^^^^
+image::transfunc_aux_test.png[]
+Demonstrating the flexible power of 'aux inlets' and transfer functions.
+
+Key and mouse bindings
+----------------------
+This section describes the key and mouse actions available in the score window.
+
+Many actions work by the concept of "soft selection", this means that an action is initiated
+by pressing a key or clicking a mousebutton while pointing the mousecursor over the object that
+should be affected.
+
+In this text, *btn1* refers to the left, *btn2* to the middle
+and *btn3* to the right mouse button.
+
+Tool modes
+~~~~~~~~~~
+The current tool mode is shown in the status bar.
+Change tool by pressing the corresponding key:
+
+*o*:: object mode
+*a*:: align mode
+*c*:: copy mode
+*i*:: insert mode
+
+'Object mode' is the default one and other modes will go back to this after
+any action is done.
+
+All modes
+~~~~~~~~~
+*home*:: scroll to start
+*1*:: fit all
+*+*:: zoom in
+*-*:: zoom out
+*L*:: toggle object labels
+*O*:: toggle object outlines
+*U*:: toggle delay update
+*E*:: set endmark to current pointer position
+*b*:: add new page break at pointer position
+*0*:: locate play cursor to start of score
+*space*:: toggle play/stop
+*btn2* drag:: pan view
+*delete* or *backspace*:: delete object, connection or marker while moving it.
+
+.Additionally these actions are available on menu's:
+*ctrl-u*:: perform all pending updates
+*ctrl-k*:: stop background updates
+*alt-e*:: set endmark to end of last object
+*ctrl-o*:: open file
+*ctrl-s*:: save file
+*ctrl-n*:: create new project
+*ctrl-p*:: print score to file
+*ctrl-q*:: quit
+*alt-l*:: bring up console log window
+
+Object mode
+~~~~~~~~~~~
+*btn1* drag:: move objects, hold *shift* to only move in y-direction,
+hold *control* to only move in time-direction
+*alt*-*btn1* drag:: resize object
+*n* or *btn3*:: on score background to create a new object
+*.* or *btn3*:: on object to make connection
+*p*:: on object, connection, or score background to show and edit properties
+*u*:: on object to update only that object
+*e*:: on object to make it editable. See 'edit mode' for details.
+
+Align mode
+~~~~~~~~~~
+When 'align mode' is active, all object will show its alignmentpoints (often only start
+and end of object).
+
+Drag with *btn1* from an alignmentpoint in one object to one in another object,
+this will move the first object so that the alignmentpoints occur at the same time.
+Hold *alt* to resize the first object so that it ends at the alignment.
+
+Drag with *btn3* to align and also create a permanent link between the
+objects, shown as a dotted line. If you move one object, all others linked with it will
+move along in time-direction. *alt* works with links too, for resizing.
+
+Hold *shift* and drag to remove a link between objects.
+
+Hold *control* and drag to only create a link without aligning first.
+
+Copy mode
+~~~~~~~~~
+Moving objects as in 'object mode', but creates a copy of the object.
+
+Drag with *btn3* to create a ghost copy: an object that is an alias for the
+source object and will have its own position and length, but
+inherit all other properties from the source object.
+
+Edit mode
+~~~~~~~~~
+Pressing *e* on an object in 'object mode' tells the object to initiate user editing.
+Some objects brings up some special editing window and some enters interactive editing mode
+where they will respond to key and mouse events in the score.
+
+The object shows a thicker outline in a different color to indicate that its in
+edit mode.
+
+Clicking on another editable object changes edit mode to that object.
+
+Pressing *escape* or clicking on the score background exits edit mode.
+
+All other events on the object is handled by the object.
+
+Insert mode
+~~~~~~~~~~~
+Drag with button 1 to move all objects which are to the right of the mouse
+cursor in the time-direction.
+
+Included classes
+----------------
+.Todo:
+- Describe properties of base classes like ASObject, ASPlotObj, etc..
+- Show what classes each subclass is derived from..
+- Pictures of each object, automate this?
+
+include::classes.inc[]
+
+Internals
+---------
+.Todo:
+* how objects communicate, get_value, get_event, interpolation, core data types, etc..
+* updating and redrawing
+
+Customization
+~~~~~~~~~~~~~
+.Todo:
+* document the ASObject base class
+* basic nasal syntax
+* document libraries

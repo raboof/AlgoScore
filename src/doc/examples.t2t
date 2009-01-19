@@ -1,0 +1,89 @@
+
+= Examples =[examples]
+This section comments on the examples found in the ``AlgoScore/examples`` folder.
+
+== test.orc ==
+The following csound examples uses the orchestra file below.
+It defines 4 simple instruments, and exports the global variables
+``gkb`` and ``gkc`` as ``tone_amp`` and ``tone_pitch`` channels.
+%!include: ``../../examples/test.orc``
+
+== csound_test.as ==
+This is a simple csound test that uses single csound event objects and
+control curves connected to a csound bus.
+
+[csound_test.png]
+
+The five objects with a circled number at the top are single csound events
+(``cs_instr``). The number in the circle is the instrument number, optional
+numbers after that are extra parameters. (p4, p5, ...)
+The csound event objects are connected to the ``events`` inlet on a
+``csound_bus`` which uses the ``test.orc`` orchestra file.
+
+Below the csound bus, there is one ``jitter`` object controlling the
+amplitude on a ``sine`` object, with the frequency controlled by a
+``linseg`` object through a transfer function (``1+x*6``).
+
+The ``sine`` object is then connected to the ``tone_amp``
+inlet of the csound bus, as exported by the ``chnexport`` opcode in the
+``test.orc`` orchestra file.
+
+At the bottom, another ``linseg`` is connected directly to the ``tone_pitch``
+inlet of the csound bus. This linseg is linked with one of the
+single event objects at the top, shown as a dotted line.
+
+== evgen_test.as ==
+This is a more advanced example of how nasal code can be used in the score
+to generate events algorithmically.
+
+[evgen_test.png]
+
+At the top is a ``datagen`` object that holds editable nasal code that generate
+events. (press ##e## on it to edit). It is connected to an ``evgraph`` object to visualize the events,
+and to a ``csound_bus`` using the ``test.orc`` orchestra file for synthesis.
+
+Two ``linseg`` objects are connected to //aux inlets// ``A`` and ``B`` on the
+``datagen`` object. (These inlets are created with the ``aux_inputs``
+property).
+
+A ``cs_ftab`` object is connected to the ``ftable`` inlet on the csound bus,
+and defines table 1 to be a breakpoint curve using the GEN7 routine. The csound
+bus sends the generated table back to the ``cs_ftab`` object for visualization.
+
+=== datagen code ===
+
+The code inside the ``datagen`` object first assigns some variables that
+we will use later:
+| ``seed`` | random seed number
+| ``n`` | number of events to generate
+| ``maxdur`` | maximum duration of events
+| ``mindur`` | minimum duration of events
+
+It then seeds the random generator and creates a vector ``v`` with size ``n``.
+
+The ``forindex`` loop iterates through the vector (``n`` times), and sets some
+variables to be used to build the event. Some of them are randomized, and some
+also takes input from the ``A`` and ``B`` //aux inlets// to control the maximum
+of the generated events amplitude and pitch.
+
+The following variables are automatically available to the code:
+``input`` is a table of input functions in the form //INLET(t)// where t is time.
+``length`` is the length of the object.
+
+The last line in the loop puts the generated event as element ``i`` in vector
+``v``.
+
+When the loop is finished, the vector ``v`` is put in ``out.data``
+which is the place where generated events should be stored.
+
+== midi_test.as ==
+[midi_test.png]
+
+This is a demonstration of the MIDI bus, in this example note events are
+generated with a ``datagen`` object and a couple of curve objects makes control
+change events.
+
+== transfunc_aux_test.as ==
+[transfunc_aux_test.png]
+
+Demonstrating the flexible power of //aux inlets// and transfer functions.

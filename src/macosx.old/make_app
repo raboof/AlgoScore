@@ -1,0 +1,2 @@
+#!/bin/sh
+./osx-app.sh -s -b ../../algoscore -p Info.plist

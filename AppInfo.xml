@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<AppInfo>
+	<Summary>AlgoScore</Summary>
+	<About>
+	    <Purpose>Graphical algorithmic compositional environment</Purpose>
+            <Author>Jonatan Liljedahl &lt;lijon@kymatica.com&gt;</Author>
+	    <License>GPL2</License>
+            <Homepage>http://kymatica.com/algoscore</Homepage>
+	</About>
+</AppInfo>

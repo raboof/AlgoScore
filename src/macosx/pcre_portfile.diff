@@ -1,0 +1,16 @@
+--- /opt/local/var/macports/sources/rsync.macports.org/release/ports/devel/pcre/Portfile	2008-10-10 12:42:48.000000000 +0200
++++ /Users/user/pcre_newportfile	2008-11-02 04:32:11.000000000 +0100
+@@ -29,11 +29,11 @@
+                 sha1    552909f9d18e1954eec639f926957a4cb2de1ec3 \
+                 rmd160  f8cc336f984bce9bfebaef27e6376d84845bce8f
+ 
+-depends_lib     port:readline
++# depends_lib     port:readline
+ 
+ configure.args  --docdir=${prefix}/share/doc/${name}-${version} \
+                 --enable-unicode-properties \
+-                --enable-pcretest-libreadline
++#                --enable-pcretest-libreadline
+ 
+ post-configure {
+     if {![variant_isset doc]} {

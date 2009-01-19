@@ -1,0 +1,428 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title>Nasal Core Library</title>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<link rel="stylesheet" href="nasal.css">
+</head>
+<body>
+
+<h2 id="lib">Nasal Core Library</h2>
+
+<h3>Data Structure Basics</h3>
+<p>
+<dl>
+<dt>append(vector, elements...)
+<dd>The first argument specifies a vector.  Appends the remaining
+    arguments to the end of the vector.
+
+<dt>setsize(vector, size)
+<dd>Sets the size of a vector. The first argument specifies a vector,
+    the second a number representing the desired size of that vector.
+    If the vector is currently larger than the specified size, it is
+    truncated.  If it is smaller, it is padded with nil entries.
+    Returns the vector operated upon.
+
+<dt>subvec(vector, start, length=nil)
+<dd>Returns a sub-range of a vector.  The first argument specifies a
+    vector, the second a starting index, and the optional third
+    argument indicates a length (the default is to the end of the
+    vector).
+
+<dt>contains(hash, key)
+<dd>The first argument specifies a hash, the second must be a
+    scalar.  Returns 1 if the hash contains the scalar as a key, 0
+    if not.
+
+<dt>delete(hash, key)
+<dd>The first argument specifies a hash, the second must be a
+    scalar key.  Deletes the key from the hash if it exists.
+    Operationally, this is identical to setting the hash value specified
+    by the key to nil, but this variant potentially frees
+    storage by deleting the reference to the key and by shrinking
+    the hash.
+
+<dt>int(value)
+<dd>Returns the integer part of the numeric value of the single
+    argument, or nil if none exists.  Truncates towards zero, not
+    negative infinity (i.e. it's implemented in C as a double to
+    integer typecast).
+
+<dt>num(value)
+<dd>Returns the numeric value of the single argument, or nil if none
+    exists.
+
+<dt>keys(hash)
+<dd>Returns a vector containing the list of keys found in the single
+    hash argument.
+
+<dt>pop(vector)
+<dd>Removes and returns the last element of the single vector argument.
+
+<dt>size(object)
+<dd>Returns the size of the single argument.  For strings, this is
+    the length in bytes.  For vectors, this is the number of
+    elements.  For hashes, it is the number of key/value pairs.  Returns
+    nil for number and nil arguments.
+
+<dt>streq(a, b)
+<dd>Tests the string values of the two arguments for equality.  Needed
+    because the == operator in Nasal tests for numeric equality, as in
+    perl.  So <code>"0"&nbsp;==&nbsp"0.0"</code> is true,
+    but <code>streq("0",&nbsp;"0.0")</code> is false.  This is rarely
+    required in typical code.
+
+<dt>cmp(a, b)
+<dd>Compares two strings, returning -1 if a is less than b, 0 if they
+    are identical, and 1 if a is greater than b.
+
+<dt>sort(vector, function)
+<dd>Creates a new vector containing the elements in the input vector
+    sorted in ascending order according to the rule given
+    by <code>function</code>, which takes two arguments (elements of
+    the input vector) and should return less than zero, zero, or
+    greater than zero if the first argument is, respectively, less
+    than, equal to, or greater than the second argument.  Despite
+    being implemented with ANSI C <code>qsort()</code>, the sort is
+    stable; "equal" elements in the output vector will appear in the
+    same relative order as they do in the input.
+
+<dt>substr(string, start, length=nil)
+<dd>Computes a substring.  The first argument specifes a string, the
+    second is an integer index of the start of a substring, the
+    optional third argument specifies a length (the default is to
+    return the remaining string).  Example: substr("abcde", 1, 3)
+    returns "bcd".
+
+<dt>sprintf(format, varargs...)
+<dd>Creates and returns a string formatted as per ANSI C sprintf().
+
+<dt>find(needle, haystack)
+<dd>Finds and returns the index of the first occurence of the string
+    needle in the string haystack, or -1 if no such occurence was found.
+
+<dt>split(delimeter, string)
+<dd>Splits the input string into a vector of substrings bounded by
+    occurences of the delimeter substring.
+
+<dt>rand(seed=nil)
+<dd>Returns a random number in the range [0:1) (that is, 0.0 is a
+  possible return value.  1.0 is not).  If a numeric argument is
+  specified, it is used as a seed instead and the function returns
+  nil.  Implemented in terms of the C library's rand/srand functions;
+  the result should have a full double-precision number's worth of
+  randomness even on systems with a 15 bit rand().
+
+</dl><h3>Internals and Functional Programming</h3><dl>
+
+<dt>typeof(thing)
+<dd>Returns a string indicating the type of the single argument, any
+    of: nil, scalar, vector, hash, func, or ghost.
+
+<dt>die(error)
+<dd>Terminates execution and unwinds the stack.  This invokes the same
+    internal exception handler used for internal runtime errors. Use
+    this to signal fatal errors, or to implement exception handling.
+    The error thrown (including internal runtime errors) can be caught
+    with call().
+
+<dt>call(fn, args=[], me=nil, namespace=nil, error=nil)
+<dd>Calls the given function with the given arguments and returns the
+    result.  The optional arguments can be used to specify the "me"
+    reference for a function call and the local variable namespace.  The
+    error argument, if present, must be a vector.  If the called
+    function terminates due to a runtime error or die() call, the error
+    (either a string or the argument to die() is appended to the vector,
+    followed by the file name at which the error occurred, followed by
+    the line number in that file, followed in order by each file/line
+    number on the call stack.
+
+<dt>caller(level=1)
+<dd>Returns a record from the current call stack.  Level zero is the
+    currently executing function.  Level one (the default) is the caller
+    of the current function, etc... The result is a four element vector
+    containing: the local variables hash table, the function object, the
+    source file, and the line number.
+
+<dt>compile(code, filename="&lt;compile&gt;")
+<dd>Compiles the specified code string and returns a function object
+    bound to the current lexical context.  The file name of the
+    function, if unspecified in the second argument, is simply
+    "&lt;compile&gt;".  On error, the function dies with a
+    user-readable string error message as per die().
+
+<dt>closure(fn, level=0)
+<dd>Returns the hash table representing the lexical namespace of the
+    given function.  Level zero is the scope in which the func{...}
+    expression was evaluated.  Level one is the enclosing scope, etc...
+
+<dt>bind(func, namespace=nil, outer_scope=nil)
+<dd>The opposite of closure, bind() creates a new function object.  A
+    function in Nasal is three things: the first is the actual
+    bytecode or C function pointer of the function (specified here via
+    another function argument from which to extract the code).  The
+    second is the local variable namespace (a hash table) of the
+    "super-function" that was running when the function was bound
+    (i.e., when the func{...} expression was evaluated).  The third is
+    the closure object of that super-function from which the lexical
+    environment of the super-super-function can be extracted, etc...
+
+</dl><h3>Math Library</h3><dl>
+
+<dt>math.sin(number)
+<dd>Returns the sine of the single argument
+
+<dt>math.cos(number)
+<dd>Returns the cosine of the single argument
+
+<dt>math.exp(number)
+<dd>Returns <i>e</i> (Euler's constant) raised to the power
+    specified by the single argument
+
+<dt>math.ln(number)
+<dd>Returns the natural logarithm of the single argument.
+
+<dt>math.sqrt(number)
+<dd>Returns the square root of the single argument.
+
+<dt>math.atan2(x, y)
+<dd>Returns the arctangent of y/x, with the correct sign for the
+    quadrant.  Wraps the ANSI C function of the same name.
+
+<dt>math.e
+<dd>Euler's constant: 2.7182818284590452354
+
+<dt>math.pi
+<dd>Pi: 3.14159265358979323846
+
+</dl><h3>Bitfield Library</h3><dl>
+
+<dt>bits.fld(string, startbit, length)
+<dd>Interpreting the string str as bits, returns the bitfield of the
+    specified length starting at startbit.  Interprets the result as
+    an unsigned integer.
+
+<dt>bits.sfld(string, startbit, length)
+<dd>As bits.fld(), but interprets the result as a 2's complement
+    signed value.
+
+<dt>bits.setfld(string, startbit, length, value)
+<dd>Sets the specified value into the bit string at the specified
+    position.  The string must be mutable: either the result of a
+    runtime concatenation (the ~ operator) or a call to bits.buf()
+    (see below).  Attempts to modify immutable strings (e.g. compile
+    time constants) will produce a runtime error.
+
+<dt>bits.buf(length)
+<dd>Returns a zero-filled mutable string of the specified length.
+
+</dl><h3>UTF8 Library</h3><dl>
+
+<dt>utf8.chstr(unicode)
+<dd>Returns a string containing the UTF8 representation of the
+    specified unicode character value.
+    
+<dt>utf8.strc(string, index)
+<dd>Returns the unicode character at the specified index within the UTF8
+    string.  Dies on encoding error or overrun.
+
+<dt>utf8.substr(string, start, len=nil)
+<dd>As for regular substr(), but the indices are of UTF8 characters
+    intead of bytes.  Dies on encoding error or overflow.
+
+<dt>utf8.size(string)
+<dd>As for regular size() when called on a string, but returns the
+    number of UTF8 unicode characters instead of bytes.  Dies on
+    encoding error.
+
+<dt>utf8.validate(string, replace=`?`)
+<dd>Checks the string for UTF8 validity.  At every byte position where
+    an encoding error is found, it replaces that byte with the
+    specified replacement character (default is `?`).  Note that the
+    second argument is a number, not a string.
+
+</dl><h3>I/O Library</h3><dl>
+
+<dt>io.open(filename, mode="r")
+<dd>Opens the file with the specified mode (as per ANSI fopen()) and
+    returns a ghost object representing the filehandle.  Failures are
+    thrown as runtime errors as per die().
+
+<dt>io.close(filehandle)
+<dd>Closes the specified file as per ANSI fclose().
+
+<dt>io.read(filehandle, buf, len)
+<dd>Attempts to read length bytes from the filehandle into the
+    beginning of the mutable string buf.  Failures (including overruns
+    when length &gt; size(buf)) are thrown as runtime errors as per
+    die().  Returns the number of bytes successfully read.
+
+<dt>io.write(filehandle, str)
+<dd>Attempts to write the entirety of the specified string to the
+    filehandle.  Failures are thrown as runtime errors as per die().
+    Returns the number of bytes successfully written.
+
+<dt>io.seek(filehandle, position, whence)
+<dd>As ANSI fseek().  Attempts to seek to the specified position based
+    on the whence value (which must be one of io.SEEK_SET,
+    io.SEEK_END, or io.SEEK_CUR).
+
+<dt>io.tell(filehandle)
+<dd>Returns the current seek position of the filehandle.
+
+<dt>io.readln(filehandle)
+<dd>Reads and returns a single text line from the filehandle.
+   Interprets both "\n" and "\r\n" as end of line markers, and does
+   not include the "\r" or "\n" bytes in the returned string.  End of
+   file or error is signaled by returning nil.
+
+<dt>io.stat(filename)
+<dd>Calls unix or win32 stat() on the specified file name and returns
+    a seven element array whose contents are, in order: dev, ino, mode,
+    nlink, uid, gid, rdef, size, atime, mtime, ctime.  Errors are
+    signaled as exceptions as per die().
+
+</dl><h3>Thread & Synchronization Library</h3><dl>
+
+<p>Nasal's threadsafety implementation uses an internal, minimal
+synchronization library.  The <code>thread</code> module exposes those
+primitives to script code.
+
+<dt>thread.newthread(func)
+<dd>Spawns a new thread that begins running in the specified function closure.
+
+<dt>thread.newlock()
+<dd>Creates and returns a new mutex lock.
+
+<dt>thread.lock(lock)
+<dd>Locks a mutex.
+
+<dt>thread.unlock(lock)
+<dd>Unlocks a mutex.
+
+<dt>thread.newsem()
+<dd>Creates and returns a new semaphore object.
+
+<dt>thread.semdown(sem)
+<dd>Executes a "down" operation on the semaphore, waiting until a
+    separate thread calls semup() if needed.
+
+<dt>thread.semup(sem)
+<dd>Executes an "up" operation on the semaphore, increasing the
+    internal count and waking up one waiting thread if needed.
+
+</dl><h3>Unix Library</h3><dl>
+
+<dt>unix.pipe()
+<dd>Creates a pipe and returns a 2-element array containing the read
+    and write filehandles.  Runtime errors are signaled as per die().
+
+<dt>unix.fork()
+<dd>Forks the process as per the system call of the same name.
+    Runtime errors are signaled as exceptions of the same name.
+
+<dt>unix.dup2(oldfilehandle, newfilehandle)
+<dd>Makes newfilehandle a copy of oldfilehandle as per the system call
+    of the same name.  Runtime errors are signaled as per die().
+
+<dt>unix.exec(filename, argv, envp)
+<dd>Calls unix execve() to replace this process with a new one.  The
+    argv and env arrays are passed to the new process.  Runtime errors
+    are signaled as per die().
+
+<dt>unix.waitpid(pid, nohang=0)
+<dd>Calls unix waitpid() to retrieve the exit code of a child
+    process.  The nohang flag causes WNOHANG to be passed to the
+    system call.  Runtime errors are signaled as per die().
+
+<dt>unix.opendir(directorypath)
+<dd>Opens the specified directory and returns a ghost handle.  Runtime
+    errors are signaled as per die().
+
+<dt>unix.readdir(dirhandle)
+<dd>Reads and returns the next filename from the directory handle.
+    Runtime errors are signaled as per die().
+
+<dt>unix.closedir(dirhandle)
+<dd>Closes the specified directory handle.
+
+<dt>unix.time()
+<dd>Returns the current system time, in fractional epoch seconds.
+    Uses gettimeofday() to achieve millisecond or better resolution.
+
+<dt>unix.chdir(path)
+<dd>Changes the current working directory.  Runtime errors are
+     signaled as per die().
+
+<dt>unix.environ()
+<dd>Returns the current unix environment as an array of strings of the
+    form "VAR=value".
+
+</dl><h3>Regex (PCRE) Library</h3><dl>
+
+<dt>regex.comp(regex, opts="")
+<dd>Calls pcre_compile()/pcre_study() and returns a ghost representing
+    the compiled regular expression object.  The opts string
+    (corresponding to the "letters after the slash" in a perl regex)
+    can contain the bytes: 'i' for caseless matching, 'm' for
+    multiline behavior where '^$' can match next to a newline, 's' for
+    single line behavior where the dot matches newlines, and 'x' for
+    extended syntax allowing whitespace and comments.
+
+<dt>regex.exec(regex, string, start=0)
+<dd>Matches the regular expression against the string starting at the
+    specified index.  Returns a vector (the pcre "ovector") containing
+    matches.  Each match returned is stored as a start and
+    one-past-end offset in the vector.  An empty vector indicates no
+    match.  The first match is the entirety of the matched substring.
+    Matches 1 and higher contain the parenthesized submatches, if any,
+    in the order in which their opening parenthesis appears in the
+    regular expression.
+
+</dl><h3>SQLite Library</h3><dl>
+<p>Integration with the SQLite
+    (<a href=http://www.sqlite.org>www.sqlite.org</a>) database
+    engine.
+
+<dt>sqlite.open(filename)
+<dd>Opens a connection to a SQLite database in the specified file,
+    creating the file if needed, and returns a db handle.  Signals
+    errors via die().
+
+<dt>sqlite.close(db)
+<dd>Closes the specified database connection.  This call is generally
+    optional; garbage collection will destroy stale connections.
+
+
+<dt>sqlite.prepare(db, sql)
+<dd>Creates a prepared statement on the specified database from the
+    SQL code in the second argument.  Signals errors via die().
+
+
+<dt>sqlite.exec(db, stmt, [opt. callback], bind_args...)
+<dd>Executes a SQL statement (either a string or a prepared statement
+    returned from prepare()).  The bind arguments are assigned in
+    order to the "?" placeholders in the original SQL.  Each row of
+    the result, if any, is placed in a hash table indexed by field
+    name.  If the optional callback argument is specified, it is
+    invoked once for each row, with the hash table as an argument.
+    Otherwise, all rows returned are appended to a single vector and
+    returned as the result of sqlite.exec().  Signals errors via die().
+
+<dt>sqlite.finalize(stmt)
+<dd>Finalizes and free storage associated with a prepared statement.
+    This call is generally optional; garbage collection will destroy
+    stale statements.
+
+</dl><h3>GNU Readline Library</h3><dl>
+<p>Minimal but functional integration with GNU readline, allowing for
+runtime command line editing.  This is used by
+the <code>interactive</code> module to implement the interactive nasal
+interpreter.
+<dt>readline(prompt="> ")
+<dd>Read and return a line of input from the user, or nil at end-of-stream.
+
+</dl>
+
+</body>
+</html>

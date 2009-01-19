@@ -1,0 +1,112 @@
+gtk-error-bell = 0
+
+style "monofont" {
+    font_name = "Mono 10"
+}
+
+style "bigmono" {
+    font_name = "Mono 16"
+}
+
+style "tool_label" {
+    font_name = "Sans 16"
+}
+
+#style "prompt" {
+#    font_name = "Mono 11"
+#    base[NORMAL] = "#282828"
+#    text[NORMAL] = "#00ff00"
+#}
+
+style "labels" {
+    fg[NORMAL] = "#eeeeee"
+    fg[ACTIVE] = "#eeeeee"
+    fg[PRELIGHT] = "#ffffff"
+    fg[INSENSITIVE] = "#888888"
+    fg[SELECTED] = "#eeeeee"
+#    bg[NORMAL] = "#505055"
+#    bg[NORMAL] = "#757575"
+#    bg[PRELIGHT] = "#505560"
+#    bg[ACTIVE] = "#484848"
+#    bg[ACTIVE] = "#656565"
+#    bg[INSENSITIVE] = "#505050"
+#    bg[SELECTED] = "#303080"
+}
+
+style "buttons" {
+    bg[NORMAL] = "#606060"
+    bg[PRELIGHT] = "#707070"
+    bg[ACTIVE] = "#505050"
+}
+
+#style "togglebuttons" {
+#    bg[NORMAL] = "#606060"
+#    bg[PRELIGHT] = "#707070"
+#    bg[ACTIVE] = "#454545"
+#}
+
+#style "score" {
+##    bg[NORMAL] = "#d0d0d0"
+#    bg[NORMAL] = "#e0e0e0"
+#}
+
+style "tree" {
+   fg[NORMAL] = "white"
+   fg[PRELIGHT] = "white"
+   text[NORMAL] = "#eeeeee"
+   text[SELECTED] = "white"
+   base[SELECTED] = "#558855"
+   base[ACTIVE] = "#557755"
+}
+
+style "default" {
+    GtkRange::slider_width = 12
+    GtkRange::stepper_size = 12
+    GtkScrollbar::min_slider_length = 12
+    GtkCheckButton::indicator_size=12
+    GtkRadioButton::indicator_size=12
+    GtkStatusbar::shadow_type = none
+    GtkNotebook::tab_vborder = 1
+    GtkNotebook::tab_hborder = 1
+    xthickness = 1
+    ythickness = 1
+
+    fg[NORMAL] = "#eeeeee"
+#    fg[NORMAL] = "#333333"
+    fg[ACTIVE] = "#eeeeee"
+    fg[PRELIGHT] = "#ffffff"
+    fg[INSENSITIVE] = "#888888"
+    fg[SELECTED] = "#eeeeee"
+    bg[NORMAL] = "#505055"
+#    bg[NORMAL] = "#757575"
+    bg[PRELIGHT] = "#606065"
+    bg[ACTIVE] = "#484848"
+#    bg[ACTIVE] = "#656565"
+    bg[INSENSITIVE] = "#505050"
+    bg[SELECTED] = "#808090"
+    base[ACTIVE] = "#303035"
+    base[SELECTED] = "#808080"
+    base[NORMAL] = "#404045"
+    base[INSENSITIVE] = "#303030"
+    text[SELECTED] = "#000000"
+    text[NORMAL] = "#ffffff"
+    text[ACTIVE] = "#ffffff"
+    text[INSENSITIVE] = "#505050"
+    GtkWidget::cursor-color = "#ffffff"
+    font_name = "Sans 10"
+}
+
+gtk-toolbar-icon-size = small-toolbar
+
+class "GtkWidget" style "default"
+#widget "*" style "default"
+class "GtkButton" style "buttons"
+class "GtkToggleButton" style "buttons"
+class "GtkToolbar" style "buttons"
+class "GtkComboBox" style "buttons"
+class "GtkScrollbar" style "buttons"
+widget "*.monotext" style "monofont"
+widget "*.timelabel" style "bigmono"
+widget "*.tool_label" style "tool_label"
+class "GtkLabel" style "labels"
+class "GtkTreeView" style "tree"

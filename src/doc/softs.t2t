@@ -1,0 +1,94 @@
+
+= Other software =
+This section contains short descriptions of various software related to building
+or running AS. The descriptions below are based on each projects own wordings
+from their websites.
+
+== Nasal ==[nasal]
+Nasal is an embeddable scripting language, with features like dynamic typing,
+garbage collection, and a small footprint. The syntax is similar to C and
+JavaScript, and is easy to learn.
+
+Most of AS is written in Nasal, and it has a built-in Nasal interpreter with
+bindings to GTK, Cairo, Csound, and more.
+
+More information and documentation: http://plausible.org/nasal
+
+== JACK ==[jack]
+JACK Audio Connection Kit is a low-latency audio server, written for POSIX
+conformant operating systems such as GNU/Linux and Apple's OS X. It can connect
+a number of different applications to an audio device, as well as allowing them
+to share audio between themselves. Recent versions also supports MIDI.
+
+AS uses JACK to play audio and MIDI.
+
+More information and downloads: http://jackaudio.org
+
+== Csound ==[csound]
+Csound is a sound design, music synthesis and signal processing system,
+providing facilities for composition and performance over a wide range of
+platforms. It is not restricted to any style of music, having been used for many
+years in the creation of classical, pop, techno, ambient, experimental, and (of
+course) computer music, as well as music for film and television.
+
+More information and downloads: http://csounds.com
+
+== Libsndfile ==[libsndfile]
+Libsndfile is a C library for reading and writing files containing sampled sound
+(such as MS Windows WAV and the Apple/SGI AIFF format) through one standard
+library interface.
+
+More information and downloads: http://www.mega-nerd.com/libsndfile
+
+% == X11 ==[x11]
+% X Window System provides the standard toolkit and protocol with which to build
+% graphical user interfaces (GUIs) on most Unix-like operating systems.
+% See http://en.wikipedia.org/wiki/X11 for more information.
+%
+% It is included by default in most Linux distributions. X11 for Mac OS X can
+% be installed from the installation DVD or downloaded from the net.
+% See http://en.wikipedia.org/wiki/X11.app for details.
+
+== ROX-Filer ==[rox]
+ROX is a fast, user friendly desktop which makes extensive use of drag-and-drop.
+The interface revolves around the file manager, or filer, following the
+traditional Unix view that "everything is a file" rather than trying to hide the
+filesystem beneath start menus, wizards, or druids. The aim is to make a system
+that is well designed and clearly presented.
+
+AS does not depend on ROX in any way, but the source package ships with an
+AppRun script that makes it easy to start AS under ROX.
+
+More information and downloads: http://rox.sf.net
+
+== GTK+ ==[gtk]
+GTK+ is a highly usable, feature rich toolkit for creating
+graphical user interfaces which boasts cross platform compatibility and an easy
+to use API.
+
+More information and downloads: http://gtk.org
+
+== XCodeTools ==[xcode]
+Xcode is Apple's premiere development environment for Mac OS X.
+It includes the powerful GCC compiler and other tools needed for building
+applications from source.
+
+In addition to being packaged on the DVD with every copy of Mac OS X, the latest
+Xcode can be downloaded at Apple's developer website.
+
+See http://developer.apple.com/tools/xcode for more information.
+
+== MacPorts ==[macports]
+The MacPorts Project is an open-source community initiative to design an
+easy-to-use system for compiling, installing, and upgrading either command-line,
+X11 or Aqua based open-source software on the  Mac OS X operating system.
+
+More information and downloads: http://www.macports.org
+
+== CMake ==[cmake]
+CMake is a cross-platform, open-source build system. It is
+used to control the software compilation process using simple platform and
+compiler independent configuration files. CMake generates native makefiles and
+workspaces that can be used in the compiler environment of your choice.
+
+More information and downloads: http://www.cmake.org

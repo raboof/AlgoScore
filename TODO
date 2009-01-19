@@ -1,0 +1,841 @@
+Those are my quite personal and non-ordered notes about bug fixes, improvements
+and new features to add. Some are in swedish...
+
+GDB: handle SIG33 nostop noprint pass
+
+* Canvas rewrite, think about using existing cairo canvas:
+  GooCanvas, CrCanvas or CcCanvas. GooCanvas seems nice...
+  Or learn how they do it and make my own?
+  Then we have fast pointertest and could highlight objects at mouse-over,
+  also graphical zoom, simple event handling since the items are GObjects,
+  stacking, etc...
+  Use a CanvasGroup per object and then use canvas items for the drawing?
+  Or use cairo directly in a custom item, perhaps drawing on a cache surface?
+  (We could make a GooCanvasItemSurface that displays a cairo surface)
+  When timezooming all objects need to update and redraw themselves.
+  Also clip to scroll-region when zoomed in? GDK window size limit could be
+  a problem, and cairos 16bit limit...
+  Currently we don't actually draw anything that isn't on the screen, and
+  scrolling just changes what part of the objects should be drawn (that's
+  why it's a bit slow)..
+  Does GooCanvasItems check visible scroll region when drawing paths or does
+  it leave it up to cairo to do the clipping?
+  
+  To summarize, the problem is that our objects can be extremely long..
+  A 45 minute long object and a timezoom of 200px per second means
+  540,000 pixels. We can't have this big image surfaces? Does GooCanvas
+  handle such big items? Does GooCanvas handle such big canvas?
+  We need a way to let objects draw only their visible part (or a couple
+  of screen-widths around this part).
+  The paint method gets a GooCanvasBounds argument for this.
+  This seems to be solvable, see demo-large-items.c...
+  
+  Moving complex objects in GooCanvas is slow, we need a cache.
+  Perhaps just render that part of canvas to image surface when dragging
+  starts and then paint this image until dragging stops.
+  (It would be nice with a function to render just a single item so we don't
+  get the background in the moving image.) Actually we need to render one
+  screen-width more, so that unvisible part of object can be shown when
+  moved into visible part of canvas...
+  
+  I'd like to have an item that draws a cairo surface, which objects can
+  use to draw on (much like it works today). But this surface should only
+  be as big as the visible area (or a couple of screenwidths), so the object
+  needs to know when to just paint the cached surface and when to redraw
+  on this surface (when new parts of the objects comes into the visible area).
+  It seems the only time it needs to paint the cached surface is when
+  moving the object around... So we might set a flag that it's moving,
+  which are checked by the paint method. But then we might as well paint
+  directly to the canvas when this flag is not set. So...
+  At move_start, set item->moving
+  At move_end, unset item->moving
+  At paint method:
+    - if item->moving is set and item->cache_surface is null, create
+      item->cache_surface and redraw on this.
+    - if item->moving is unset and item->cache_surface exists, free it.
+    - if item->cache_surface is null, redraw on canvas
+    - else paint cache_surface
+  But we need to take care of which part of the object that is visible,
+  perhaps simply allow the surface to be screen_size*2?
+  
+  bounding box sent to paint method is for whole canvas, need to clip
+  to item and convert to item units
+  
+  if cache, need to keep track of what part we have cached and update it
+  if it changes
+  
+  How to solve sticky objects and textlabels that keep themselves visible
+  when scrolling past them? It's easy, just hook to the scroll signal and
+  move the objects.
+
+* non-time-bound sequences:
+  sometimes there's a need for sequences that are not bound to time.
+  either they are manually composed, or generated.
+  manual sequences is mostly done with 'code' objects, as a list in
+  a single event at time 0.
+  a generated one could be from a randomizer, where each time we
+  ask for a value we want a randomized one... for example a markow chain.
+  it would be nice if this worked with get_value() (ignoring t), so that
+  each time a target object asks for a value we get the next value in the
+  sequence.  this would need the source obj to know when to reset/seed.
+  each target obj should signal such a reset to the source when they
+  start collecting values (in generate()). objects that does on-the-fly
+  passing of values like funcbus would pass on also the reset signal..
+  could this be done in Inlet.get_connections() or similar?
+  also, get_event() might get them by index..
+  another approach for such a markow chain would be to have a "size"
+  property and let it pre-generate all data and put them out either as
+  numbered events or as a list in a single event...
+  think about common types and object compatibility, etc...
+  maybe we could support all three methods?
+
+* Make a cached Inlet.event_finder()? (see FuncBus.get_event())
+
+* Export doesn't work without JACK client
+
+* put outs in datagen in 'out' hash, like out.out1, with code to be
+  compatible if out was used as an output?
+
+* Put filename in Score class and current score in globals.
+
+* See if there are more places that could benefit from using
+  g_idle_add() to do stuff in the mainloop instead of in other threads..
+  (all GUI stuff for example, maybe the csound print buffer, etc?)
+
+* check file format somehow... for example grep for "score.new_obj"?
+
+* EvGraph parameter map property could be nasal expression so that one
+  can use any part of the input data and also constants, etc..
+  { y_pos: x[2],
+    dur: x[1],
+    color: x[0],
+    size: x[3],
+    black: 0.5 }
+    
+* Morph object:
+  - Connecting a previous obj to A makes sense, so maybe we should stop
+    drawing out-of-time connections as red? Draw as arc or spline?
+  - pass a "path" arg to interpolating function
+  - how to handle get_event()?
+  - how to handle vectors of different length?
+  - other vector transformations: shift, substitute, etc.. (see KyCE-II)
+
+* sometimes it disconnects from JACK:
+  "cannot complete execution of the processing graph (Resource temporarily unavailable)
+  zombified - calling shutdown handler", sometimes crashing jackd and/or qjackctl.
+
+replace subvec(x,1) with x[1:]
+replace t = ev[0]; v = ev[1] with (t,v) = ev;
+
+* if generate() returned error, abort the update-chain so we don't have to see
+  all the successive errors happening because of the first. best would be if
+  we could just not update all objects depending on the one who got an error,
+  so if multiple chains are updated in update_all we don't abort every update...?
+  done now in ASObject.update(), but what to do in Score.update_all()?
+
+* better JACK transport support:
+  - Test sync with ardour, recording an impulse
+  - can we set play_pos to pos.frame from jack_transport_query()?
+    perhaps it should be pos.frame+nframes?
+  - register slow sync callback?
+  - allow AS to be slaved if other client does start/stop/locate
+  - we need to let playpos_monitor interval proc run all the time?
+  - need to use jack transport state in OSC to be in sync with jack,
+    and don't stop in signal wait if transport is JackTransportStarting,
+    or call signal_osc_thread() in process()? since we don't know how long
+    to sleep if JackTransportStarting...
+  - need to think about all different places of play states, currently there
+    is jack_transport_query(), playing in C and play_state in nasal...
+    same thing with play position.
+
+* When changing object height, make room if it collides with other objs?
+
+* A score.unhold_update() (like after a move start but where the object didn't
+  actually move) restarts any generate threads in progress,
+  this shouldn't happen. even if pending_update is 1 it should not cancel and
+  update if it's already working. only if anything actually changed so that
+  it *needs* to be restarted.
+  A maybe-fix is to set pending_update=2 while working, and check for this
+  in score.update_all().. but the right thing should probably be to
+  see if any obj in group actually changed. tried this in score.unhold_update
+  but it didn't work: when a change actually happened the objects where not
+  updated but only set pending update on them (???)
+
+* We should check/handle outlet-inlet type mismatch. Like print a warning
+  and use default value instead. Don't remove the connection, since one
+  might add a transfunc that converts it to a proper value. But it would
+  be nice to draw it as "inactive"...
+
+* OSC bus:
+  - try to make it run without JACK? means we will have to update play_pos, etc..
+    but it should sync with JACK transport if present...
+  - use realtime sched on osc thread?
+
+* Change math.mod() behaviour back to original nasal (and python),
+  but needs fixing of timegrid drawing in score_ui.nas
+
+* C Objects. export methods for init(), draw(), etc..
+  Pass them a CObject ghost. Wrap in ASObject, like
+  class.init = func(o) o.cobj = module.init(o);
+  class.draw = func module.draw(me.cobj,arg);
+
+* GUI edit for:
+  - linseg insert/remove/move nodes
+  - jitter min/max dur (left/right), min/max value (up/down), start/end value
+
+* pagemarks should be deletable
+
+* split object at locate-cursor, handler in each class decides how to do it.
+  The default one just divides the object (copy and adjust length and start)
+
+* jitter->linseg freeze?
+
+* 'environment code', a piece of code that is saved with the project and can
+  be edited by the user. After editing this code, do:
+
+    ns=new_nasal_env();
+    ns.math=math;
+    environ=compile(code);
+    call(environ,nil,nil,ns);
+    score.nasal_env = ns;
+
+  then each time we compile usercode (code objects, transfer functions,
+  randomizers, nasal cmdline, etc..) we do:
+
+    code=bind(code,score.nasal_env);
+
+  and then evaluate it with private namespace as usual:
+    
+    ns={my_local:42,foo:123}; # local variable namespace
+    call(code,nil,nil,ns,err);
+
+  this environment can thus be used to define custom functions and stuff like
+  that.
+
+* controlrate output from csoundbus, for analysis etc.. problem is that
+  outbusses use background thread, so any dependant obj would need to postpone
+  their update until the bus is done.. one way would be to create a function
+  that does the rest of the updates and pass it to the bus to be called
+  when done...
+
+* amplitude and sonogram plots on audiobusses (csound and soundfile)?
+
+* brownian motion:
+  - gendyn-like class (N repeating breakpoints)
+  - jitter where t and/or y is relative last point (can now be done with
+    the randomizer properties)
+
+* ladspa plugin support: possibility to apply plugs on busses before playback
+  and export. For GUI realtime control of sound mix (mastering).
+  Controllable through ladspa_ctrl object/bus.
+  perhaps even possibility to use csound as plugs?
+  or should this be part of the score? (so that you connect a csound bus
+  to a ladspa bus, etc..)
+  Needs to be flexible, perhaps a patch editor where you connect busses
+  to plugs, and plugs to jack output ports. maybe we should have a static
+  set of N jack output ports?
+
+* move surf cache stuff from score_ui to ASObject.paint and other methods,
+  so that each obj does their own (optional) caching and has the ability
+  to draw outside their frame.
+  Then stuff like TextBus can draw the textbox above the busline, draw
+  connections to the busline (not the textbox) but highlight and react on
+  mouse drags on both busline and textbox, etc..
+  And ASPlotObj can draw value labels to the left of their start pos.
+
+  But we still need to be able to know the actual graphic boundaries of
+  objects, (for auto-aligning page output when exporting to PDF) which
+  might not be the "active" region in terms of user interface
+  (.xy_inside_obj() and .highlight()) or the positioning of connection
+  arrows. Perhaps we can use cairo_path_extents()?
+  
+  So, what we have is .start defining the actual start time,
+  and .xpos .ypos .width .height to define the graphic boundaries.
+  An obj needs to be able to set their .xpos themselfes, default is
+  time2x(start) but it might be time2x(start)-xofs if the obj draws
+  anything before it's start time.
+  
+  Then we have .xy_inside_obj() to get the active clicking region..
+  
+  How should we handle connections?
+  Perhaps .get_con_in_ypos(x) and .get_con_out_ypos(x) methods?
+  
+  Need to think about update_geom(), pre-paint, paint.. an obj needs to
+  know when it changes graphical size in case of surf cache.
+
+* (samma som ovan?) ta bort att objekt ritar på individuell cachad surface och
+  låt dem istället rita
+  direkt på en av två skärmbreda surfaces?? då kan de rita hur de vill...
+  nackdelen är att när man flyttar objekt så måste _alla_ synliga objekt rita om
+  sig själva.. kan lösas genom att man låter alla andra obj rita på screen surf
+  en gång och sen paintar man bara detta och ritar moving-object ovanpå?
+  ofs och width args till obj.draw() visar då vilken del av objektet som faktiskt
+  behöver ritas. döp om till ofs och end?
+
+* Layers: let all objects have a 'layer' property, and make a layer-window
+  where the current layer is choosen, layers can be created, their
+  visibility toggled on/off, etc.. can be useful for printing, and later for
+  keeping track of script-generated parts of the score.
+  In the future also 'select all in layer' for deletion, changing properties,
+  moving, etc..
+  Or perhaps better, use the concept of 'tags' instead of layers?
+
+* Also allow objects to be overlaid, for example to show multiple curves
+  on the same graphical area? Then we need a simple way to select which layer
+  we work in, perhaps dimming the other layers. Or some clever layer-scroll
+  mode, like holding a key while dragging the mouse to select which object
+  in a stack that is on top and sensitive to user events, the non-selected
+  objects could be dimmed while doing this (while holding down the key).
+
+  This should probably not be the same layer/tags system as mentioned
+  previously. This is more a concept of stacking objects, and exactly what
+  number each obj in a stack has is not important.
+  
+  One could also have two keys to rotate the stack, dimming the non-top
+  objects a second after this. and a third key to activate the dimming again
+  (without rotating the stack) or a global toggle to enable/disable constant
+  dimming of non-top objects...
+  
+  Each obj in a stack shares an ordered stacklist. vector or hash?
+  if(obj.stack!=nil and obj!=obj.stack[0]) dim()...
+  Each time we create, remove or move an obj we need to check if it left
+  its current stack and if it should be added to another.
+  
+  Stacking could also be non-automatic, perhaps this is easier. A 'stack'
+  action lets the user drag one object to another, it will then get the
+  same ypos and create a stacklist or add to the existing one.
+  vertically moving any obj in a stack moves all objs.
+  
+  There's also problems with knowing which connections that goes to what
+  object in a stack, etc.. but this could be solved by showing the object ID
+  in the inlet/outlet label at the connection arrow.
+
+* Is it possible to make AS start even without jack and/or csound but at least
+  show a dialog about the missing lib? Even better if it could be usable
+  anyway, as in weak linking.
+  what about dummy libraries that are found as a fallback if the libs
+  was not found?
+  what about a test binary that is run from a script before starting AS?
+  what about running ldd or otool to find missing symbols?
+  A last resort would be to use dlopen...
+
+* signal_bus:
+  - multiple channels? would be great if they could name the ports too, but
+    setup_ports() only enumerates them with a single integer.
+  
+* make generic code for background rendering thread handling? to be used
+  in both csound and signal busses... (also think about possibility to run
+  *all* obj update in bg threads...)
+
+* Mac OS X build:
+    osascript -l AppleScript -e 'tell Application "Finder" to display dialog "Call Frank" '
+    osascript -l AppleScript -e 'tell Application "Finder" to display alert "Call Frank" '
+
+  - try weak linking csound.
+  
+  - try to discover why AS is not so stable on OS X, it sometimes crashes
+    or freezes...
+  
+  - on some machines there are system-beeps when anything is printed on the
+    algoscore console! why?
+
+  - Need to have other key-mouse bindings since Mac as 1-button standard
+    and alt and cmd is used for 3-button emulation.. Perhaps use cmd-click
+    for button3?
+
+  - Try to build universal binary
+
+  - To move focus with the mouse pointer:
+      defaults write com.apple.x11 wm_ffm true
+    To pass through the focus click:
+      defaults write com.apple.x11 wm_click_through -bool true
+
+* Put a 'description' field in each property, inlet and outlet?
+  Then we can generate documentation for each class...
+  Fix escaping of special chars when extracting class descriptions..
+
+* move propbox code evaluation to ASObject? then it's easier to set up
+  the namespace so it could have math, G_get/G_set, me.get_prop, etc..
+  if all objs has 'aux inlets' prop, it could even have access to these..
+  Do the evaluation in get instead of set, so it will always be updated.
+  This means all props will be strings of nasal code! Note that this needs
+  all usage of props use me.get_prop(name) instead of me.name! we should then
+  probably put the string-values (and compiled expressions!) in me.properties
+  instead of in the object.
+
+  Also categories like "appearance" and "parameters" for tabbed notebook,
+  (even graphical editors and text-editor could be placed in their tabs.)
+  This is a good change since it will clean up things and not pollute the
+  objects symboltable..
+  
+  perhaps make Property class? or Properties?
+  a Property class should contain get(), get_string(), set() methods..
+  and a callback.
+  get = func nil;
+  set = func(val) {
+    me.string = val;
+    me.get = compile(val);
+    if(me.callback) me.callback();
+  }
+  get_string = func me.string;
+  
+    o.props.foo = Property.new(type);
+  or simply
+    o.add_prop(name,type,...);
+
+* many props is only graphical, they should have callback: func o.redraw().
+  perhaps make ASObject.add_obj_prop_gfx() to avoid repeating this each time?
+
+* let update_geometry be able to set a me.xofs so that objects can begin
+  visually before their start time. could be used for value scales and such..
+
+* allow non-temporal objects to be positioned before time 0, like global code
+  and csound ftables and comments. this could function as a first page of the
+  score, before time starts.. Simply put one or more page-marks before time 0!
+
+* ASPlotObj crashes with "The application '<unknown>' lost its connection
+  to the display :0.0; most likely the X server was shut down or you
+  killed/destroyed the application." if there's too much data to be plotted,
+  we need to get min/max on each pixel instead of plotting each value..
+
+* the zoom isn't working well with long scores, each step makes too big
+  difference. Also it's very slow.
+
+* normalized playback of audio busses? remember last value and update when
+  update() finished?
+
+* playbus export dialog
+- rate: label (from jack)
+- channels: label (from bus nports)
+- cancel button
+  perhaps allow flexible mapping between busses/ports and soundfile channels,
+  for splitting/merging?
+
+* 3D plot of wave terrain synthesis
+
+* reduce datasize of ftable graphs, to screen_width values or less.
+  either skip values or find min/max in each...
+  re-implement how they are stored, store graphs in the csound objects instead,
+  and make sure they're deleted when they should.
+
+* print to file:
+- default filename to project filename if any, this needs re-design
+  of where the current project filename is held... it should probably
+  be held in the score, and set by opensave.nas...
+- alt. palette file
+- clip object
+
+* do a more powerful linseg shape class that can do both single and double (mask)
+  shapes? and maybe multiple lines.. should be supported directly in ASPlotObj?
+
+* value grids in ASPlotObj, one mode where the whole scale is divided in N grids,
+  but also one where only existing nodes get a grid, eventually also one where
+  each grid is only drawn around individual nodes?
+  a problem is to place the label so it won't collide with the curve..
+
+* container objekt, kan användas till speciell value-grid objekt..
+  alla ASPlotObj som finns i detta obj positioneras automatiskt enligt
+  grid skalan, (height och ypos). skalans min/max uppdateras eventuellt enligt
+  de objekt som finns där i.
+  en toggle i GUI kan välja om man ska komma åt container objs eller vanliga
+  objs, om man inte löser det på annat sätt?
+  
+* Playmode: audiobusses or pre-rendered file (för lyssningspartitur), or option to
+  keep rendered temp-files and use exported file if any?
+
+* palette/style editor GUI, där man kan ställa in färger, linjestilar, etc..
+  och spara/ladda till filer samt välja aktuell palette.
+
+* flytta ghost_init grejjorna från duplicate() och init() till en init_base()...
+
+* låt DataGen visa sina events på sin linje, samt göra alignmentpoints..
+
+* det kan faktiskt finnas en poäng med connections mellan ej-samtida objekt!
+något i ett objekt kan påverka ett senare...
+t.ex slutet av ett objekt ska "fortsättas" på något sätt i ett annat.
+(t.ex csound tied notes?)
+
+* Interaktivt linseg objekt
+
+* Repeater object
+repeterar inkommande data/events, markerar loop-punkterna på sin linje..
+kan ha ingångar för att hoppa i loopen eller ändra dess längd, etc..  
+
+* låt TimeGrid ge ut intervall-värdet (rate) vid t.
+
+* optimera draw i PlotObj
+läs datat i chunks så att varje chunk motsvarar en pixelbredd,
+ta peakvärdena (min/max) för datat i varje chunk,
+om inzoomad så att ett datavärde tar mer plats än en pixel, rita linje mellan
+värdena och skippa ovanstående min/max grej...
+
+rita endast data inom synligt område (ofs -> ofs+width)
+
+* kan vissa rit-rutiner flyttas till C? t.ex draw_score()...
+låt i så fall signal-kopplingen ske i C till canvas expose, så behöver det inte gå via
+nasal kod alls. även andra saker som ASPlotObj.draw kan skrivas i C...
+registrera då färgpaletten med C, kanske kan vi bara ha pekare
+till färg-vektorerna? eller så använder vi naVec_get() som vanligt..
+
+* ignorera objekt utanför synligt vertikalt område, men
+rita deras connections ändå om de kommer från ett synligt objekt.
+
+* andra förbättringar med ritandet och liknande, t.ex är det ganska slött
+om man har väldigt många objekt! fundera på optimeringar. kanske sortera objekt
+på smarta sätt, t.ex "endast synliga", osv.. fundera på vad som kan flyttas till C.
+
+minimera alla linjära sökanden i objekt-listan (väldigt många nu...)
+
+* send/recv fungerar ej med get_event()...
+
+* undo
+spara projektfilen i tempfil bakåt i tiden efter varje action?
+som snapshots, märkta med tid.
+inställning för antal snapshots...
+
+* auto-clean temp-files at startup, list them and ask to delete them.
+
+* reduced view mode, objekt med "hide_in_reduced_score=1" syns då ej,
+kopplingar till och från detta objekt visas ej heller...
+eller "hide_in_print".. och gör en print-view, där man ser sida för sida,
+med title, composer, etc.. bättre lösning är kanske layers/tags?
+
+* kopiera mellan projekt
+vi behöver möjlighet att ha flera filer öppna samtidigt, t.ex med tabs?
+vissa saker måste kanske flyttas från score_ui modulen till score klassen,
+eller så låter vi score_ui_window vara en klass.. sedan behövs en clipboard.
+eller öppna helt enkelt flera algoscore? och använd GtkClipboard.
+
+* gör Functional baseclass, för sin, noise, etc...
+hur göra freq in på en funktionell klass? vi räknar ju on-the-fly vid .get_value(t),
+så om vi bara gör y = sin(t*f*2pi) så kommer ju fasen hoppa när vi ändrar frekvens...
+är det överhuvudtaget möjligt? tror inte det.. hur ska vi veta fasen vid en random
+tidpunkt om den beror på hur frekvensen förändrats tidigare?
+Detta hade varit annorlunda om varje objekt alstrade hela sitt data på en gång,
+och att mottagaren ber om upplösningen...
+
+eller räcker det bara genom att försäkra att läsning sker i rätt ordning? då kan objektet
+scanna igenom tiden (med cache) och reagera på inkommande frekvensdata, men utan att skriva
+något data. ska denna scanning ske i ett visst intervall, eller med det intervall som ges
+av con.get_event(i)? vad händer då med interpolerande indata?
+vad händer om vi samplar en gång per sinuscykel? borde inte det vara bra?
+T.ex: vi har en ramp som går från f1 till f2 under första halvan av ett sinusobjekt och
+som styr dess frekvens. vilken skillnad på fasen under andra halvan av sinusen blir det
+beroende på hur ofta rampen samplas i första halvan??
+
+nej, vi kommer inte runt att vi måste ha en upplösning... om det ska lösas matematiskt så
+går det bara om varje sändar-objekt ger ut en metod för att få integralen/arean av datat hos
+objektet, och det känns lite overkill...
+
+däremot behöver vi inte lagra datat som en samplelista, vi kan scanna (med cache) efter tidpunkten
+som efterfrågas och returnera endast det värdet.
+
+* event format och typsystem
+standardisera att events alltid är 2 elements vektor? eller tvärtom, uppmuntra att
+flera parametrar läggs i event efter t? i så fall, låt get_value(t) returnera
+subvec(ev,1), och con.get_event(i) gör ev~=[]; ev[0]+=ofs;
+nackdelen med detta är att get_value(t) returnerar en 1-elements lista när vi
+i vanliga fall förväntar oss ett enkelt värde precis som med samplebased data..
+så i så fall är det nästan bättre att vi returnerar första elementet endast.
+fast det känns lite knäppt att det är olika sorts data man får med get_value() och
+get_event()... alltså, säg att vi har en multichannel-kurva (t.ex min/max
+klusternotation), då förväntar man sig en lista på två värden både från get_event() och
+get_value()..
+
+detta kanske bäst ska lösas med ett typsystem, där typer kan ärva av varandra och
+konverteras mellan varandra... liknande GObjects typsystem.
+låt i så fall varje outlet ha en type..
+
+ska events (eller alla värden??) vara hashtables istället? t.ex {time:t,value:v,freq:f,amp:a}
+så att konvertering mellan typer är lättare? en subtyp har då kvar samma symboler som sin föräldertyp,
+men kan utöka med egna symboler, etc... man kan t.o.m använda nasals arv med parents[], varvid man
+inte behöver kopiera symboler till subtyper, samt kan rekursera genom parent-trädet för att få
+veta bastyper av en typ, etc..
+dock vill man ju att den enklaste "value" ska kunna förstå t.ex en midi-nots "pitch", och alltså
+göra value=pitch... hade varit bra med nån slags alias-system då...
+
+men bra t.ex för alla sorts events som har en duration, då använder de "duration" och
+alla som är intresserad av en events duration kan få denna...
+t.ex EvGraph kan defaulta till "duration" för att välja event längder, men i props
+så får man en meny på alla fält i inkommande event-typ? fast det kan ju vara olika
+på olika connections... 
+
+kan antagligen bli väldigt elegant, men nackdelen är att varje värde som skickas måste bli en
+hashtab även när det handlar om ett enkelt litet värde... dock behöver det ju inte lagras som sådant,
+detta kan göras i get_value/get_event, etc..
+dessutom kanske enkel-värden kan specialbehandlas och skickas som sådant?
+
+men som det är nu, kanske låt events ha extra parms direkt i event vektorn, och låt
+get_value() returnera första värdet. t.ex om vi har ett line-objekt med curve parameter
+på varje event, så vill vi ju ändå att get_value() ska returnera det faktiskt värdet och
+ignorera curve parametern! fast samtidigt, en min/max kluster-kurva vill ju ge ut
+båda värdena... kanske är det bra att ha både och? det faktiska ut-värdet som ev[1] vare sig
+det är ett tal eller en lista av tal, och ev[1+N] för extra-parametrar som behöver lagras med
+event med som ej ska ges ut med get_value()?
+
+* insert för y-led
+
+* caption_xofs och caption_yofs för att rita caption inne i obj?
+
+* rita grids i separat surface
+och bara painta denna i expose...
+behöver inte ens ritas om vid scroll, bara paint med offset modulo gridsize...
+
+* möjlighet att flytta en con till annat dest-obj...
+
+* generell event-viewer
+mappning sker till vad parametrarna betyder:
+- length
+- ypos
+- density
+- print above event
+- color
+- dot size
+- line width
+stöd även för "percussion" events (utan duration)
+
+* AudioBus
+----------
+skapa tmpfil om src ej har audiobuf.
+
+export
+
+Mixning av flera inlets?
+Antingen låter vi flera bussar dela på samma port, varvid vi behöver en global port-lista
+som varje bus refererar till...
+Eller så flyttar vi region-listan till bus->tracks[],
+for each bus:
+  out = 0;
+  for each track:
+    for each region:
+      out += sample
+Samtidigt så mixar ju jack automagiskt flera portar som kopplats till samma destination...
+
+Regions:
+--------
+region->amp,
+region->ofs,
+region->length, som klipps till file length..
+
+libsndfile har funktioner för att hantera normalization och peak-chunks i float format.
+t.ex ha normalize toggle vid export och uppspelning, samt länkar mellan varje buss för
+hur de ska grupperas vid normalisering (om man vill bibehålla balans mellan bussar/kanaler)
+
+hur göra med samplerate? ska varje audiobus ha individuell samplerate och sen gör vi
+conversion med libsamplerate vid uppspelning/export, eller ska vi helt enkelt ha en
+global samplerate? och se till att csound har samma (csoundGetSampleRate())...
+såhär: audiobussarna har en samplerate som används vid:
+- skapande av egna bufferfiler
+- export till fil
+- om källan har en buffer med annan SR så görs on-the-fly SRC vid export och uppspelning
+uppspelning gör SRC om jack ej kör samma SR som bussen...
+
+MidiBus
+-------
+export
+
+auto note off vid stop
+
+flera kanaler i samma buss?
+
+testa 14 bit CC.. (t.ex mod:1001)
+
+Bestäm ett midi-liknande eventformat som används, så kan det även exporteras till
+textfil för uppspelning/bearbetning av separata program, eller inläsning till audioscore
+igen, etc... (t.ex konvertering till lilypond) ?
+
+Fundera på hur man kan representera rytm på ett alternativt sätt, t.ex som proportioner
+eller delningar, så att export till noter inte behöver krångla till det med kvantisering
+och detektering av multoler! fast detta kanske ska ske i andra objekt än MidiBus?
+
+* csound
+--------
+låt tag-räknaren vara per instrument?
+
+gör per-event inlets:
+setInputValueCallback(), C-callback anropar nasal-callback i csound-obj,
+som i sin tur anropar cs_get_invalue(t) i rätt event-objekt, där t är current
+score time. obj.cs_get_invalue() gör sedan get_value(t)...
+man kan också skapa per-event software channels, men det kan bli rätt många..
+
+gör inlets/outlets för både kontroll och audio,
+även för standard audio outputs, vilka läses från tmpfilen..
+
+tryck 'e' för att öppna orc fil i texteditor! om ingen orc fil var specificerad, skapa
+en ny (fråga var den ska spara)... (gör generell texteditor)
+
+visa distortion med röda markeringar på csound objektet? behöver kanske parsa
+log-output från csound tyvärr... åtminstonde gör hela csound-bussen röd om distortion skett.
+
+kom på något snyggt stöd för tied notes?
+(neg p3 = hold, neg p1 = note off, p1 fraction = tag)
+t.ex rita bågar mellan cs_events, detta kräver stöd för att låta objekt rita fritt
+i partituret, t.ex genom en obj.draw_in_score() eller liknande.
+men då skulle man vilja göra kopplingarna grafiskt, kan man lösa detta genom att generalisera
+connections? alltså att ha en mer generell "object relation" varav connections är en sort.
+kan göras med samma meny som connections, så för användaren ser det ut som speciella in/ut-gångar...
+
+fixa config options för csound, eller räcker det bara med
+./configure CPPFLAGS="-I/path/to/csound/headers -L/path/to/csound/lib"
+eller CFLAGS="-framework CsoundLib" ??
+
+* möjlighet att ändra i klasskod och uppdatera objekt av den klassen..
+"reload classes" finns nu på menyn. men hur göra för att uppdatera objekten?
+kan man bara byta ut obj.parents? nej, vi måste göra motsvarande save och load..
+så att t.ex saker i class.init() utförs...
+helt enkelt, återskapa objektet och dess props, kopplingar, links, etc..
+antingen har vi ett kommando för att göra detta med objektet under pekaren,
+fast bättre vore att "reload classes" ser vilka filer som ändrats och uppdaterar
+alla obj med klasser från den filen.
+
+även möjlighet att byta ut ett objekt mot ett nytt obj av annan klass, och
+kopiera över de gemensamma properties, och connections.
+
+* anropa obj.update_unused_regions() i obj.update()?
+
+* ghost copies
+- highlight parent
+- egen length?
+- kanske en lista på vilka props som ska vara egna o vilka som ska tas från
+  parent...
+
+* props kan ha en "widget" som då används istället för GtkEntry i propbox...
+man kan också ha en "type" som kan vara:
+- code entry
+- string entry
+- toggle
+- menu
+- button (anropar callback)
+- widget (använd annan widget)
+eller kan vi använda optbox? eller slå ihop dessa..
+skillnaden är att propbox bara registrerar get/set metoder, medan optbox arbetar
+med en lista på options med name,label,value,etc...
+sen har vi ytterligare en, i prefs_ui! borde verkligen slå ihop dessa så att alla tre
+kan använda samma ramverk för types och widgets, etc..
+man kan ha samma kod i botten..
+
+* dokumentation!
+
+* edit mode kanske ska göras som en action?
+
+* auto-scroll när man drar utanför skärmen...
+vid objmove, conmove, connection och align/link.
+fungerar inte än!
+
+* globals
+förutom att de kan användas i kod så vill man t.ex kunna ange det som
+värde på en property. men att bara skriva "G_get('foo')" byter ut värdet och
+kommer sedan inte uppdatera propertien om variabeln ändras...
+kan man ha en toggle bredvid varje prop i prop-editor där man kan
+välja om det som matats in är ett värde eller en globals symbol?
+
+* transformations
+gör genom vanliga objekt (som då måste veta hur den ska transformera den typ av
+värde som inkommer) eller speciella objekt som ritas mellan två andra objekt och
+vet vilka ingångspar som ska användas, etc... och använder objektens egna metoder
+för transformation. kanske bara tillåta transform mellan två obj av samma klass?? 
+annars är frågan vilket av objektens transform() metod som ska användas!
+
+skulle kunna göras som en underklass av "generell objekt-relation" tillsammans med
+tied notes och vanliga connections?
+
+även här kanske ett typsystem kommer in i bilden?
+
+gör som ett vanligt objekt, men vi kan fortfarande använda sändarobjektens egna
+morf-metoder. problemet med detta är att objekten måste komma från samma basklass
+för att det ska fungera? men man vill ju t.ex kunna morfa mellan en sample-sekvens från
+ett noise objekt och en event-sekvens från en funktion, etc..
+så det har snarare att göra med typer:
+- numeriskt värde
+- listor av numeriska värden
+- listor av listor av numeriska värden
+- etc..
+
+och det kan finnas egenskaper hos morfningen, t.ex kvantisering av värden och olika metoder
+att transformera mellan två listor, etc..
+
+* selections för:
+- move
+- copy
+- delete
+- connect (visa gemensam lista av utgångar)
+- props (props med olika värden i olika objs markeras visuellt)
+current selection ska även gå att klippa in i console-fönstret som en lista
+på obj-id's... 
+gör även ett flexibelt match (and transform?) fönster där objekt kan selekteras
+utifrån property, classname, start, length, ypos, etc..
+transform-funktioner ska finnas i dynamiskt bibliotek, så att man kan lägga till egna, etc..
+
+* bättre möjligheter att hantera ett partitur numeriskt,
+t.ex köra egna scripts,
+inbyggd texteditor för dessa,
+hjälp-funktioner för att selektera och transformera objekt på olika sätt...
+
+* connection fields
+visas som en ram, alla objekt som befinner sig i ramen kopplas automatiskt enligt hur
+ramen är kopplad till mottagare... när man kopplar ramen så visas outlet-lista enligt
+vilka utgångar som finns hos objekten inom ramen.
+när ett objekt flyttas in i ramen så görs connection, flyttas ut görs disconnect.
+de enskilda kopplingarna från alla objekt i ramen visas ej (i score_ui: om obj ingår
+i connection group, don't draw connection)
+
+* optional arg till con.get_event(), inlet.val_finder() eller inlet.get_connections()
+(eller property av inlet!)
+för att klippa events som är utanför området istället för att ignorera dem.
+interpolating data ska klippas med obj.interpolate(a,b,x)...
+
+* options för att fylla hål med närmaste source value eller givet default value?
+kan t.ex vara ett opt arg till con.get_value()! (eller property av inlet?)
+särskilt hålet innan första connection kan vara viktigt...
+
+* cache i obj.get_value(t)... events kan använda binsearch
+
+* gör en event_bindings, lista på:
+toolmode, modifiers, key/button, callback, description
+antingen 2D hash: event_bindings[keybutton][modifier]
+eller event_bindings[modifier~keybutton]...
+"btn"~ev.button för musknappar, bara ev.keyval_name för tangenter
+men modifier bör kunna vara en lista eller wildcard...
+
+visa vad musknapparna gör med aktuellt nedtryckta modifiers i statusraden
+t.ex alignment: 1: align 2: pan 3: link
+alignment: 1: resize-align 2: pan 3: resize-link
+
+* links
+att flytta en länk mellan två obj där me.obj ingår i en grupp med fler objekt beteer sig
+lite underligt, hela gruppen flyttas till den nya länken precis som när man re-alignar ett
+objekt till en egen alignment point.
+kanske ska man göra såhär: ta bort länken, gör align, återskapa länken...
+
+ibland verkar logiken brista när man hanterar länkar mellan redan befintliga grupper o liknande.
+t.ex att fel objekt flyttas, etc..
+
+t.ex när en länk flyttas från början av två objs till end, då flyttas båda objs!
+
+att ändra längden på ett objekt där slutet är länkat till början eller slutet av ett annat obj
+borde flytta/ändra längd på det andra obj... 
+
+* rita connections som är utanför scrollwindow för synliga objekt?
+frågan är hur man undviker överlappningar...
+
+* placera connections i den synliga delen av objekten vid space search
+flytta place_connection till score_ui?
+
+* stretch, t.ex Ctrl-Alt-drag...
+obj.move_resize_done(m,r) anropar obj.stretched(f) om r==2..
+f är faktor jämfört med förra storleken... (vi behöver alltså
+låta move_resize_done() spara förra storleken)
+default methods: 
+- ändra resolution för sample outlets
+- multiplicera dt's för event outlets
+
+* implementera maskning för överlapp i y-led ?
+högre ypos ger företräde (oberoende av destobjs ypos)
+skall påverka inlet.get_connections() (varje con's start/length)
+samt obj.update_unused_regions()...
+
+* csound orc file frontend??
+grafiskt patch ritas, orc fil skapas!
+många opcodes kan ha grafiska symboler,
+andra saker ritas som generell låda med opkod namn och in och utgångar i ordning...
+matematiska uttryck ritas på samma sätt..

@@ -1,0 +1,99 @@
+Introduction
+------------
+AlgoScore is a graphical environment for algorithmic composition, where music is
+constructed directly in an interactive graphical score.
+
+Graphical objects are placed in a timeline and connected together. Some objects
+might be user-interactive and depend on user data, while some are generative
+and react on input from other objects. Each individual object also has a
+set of user-editable properties.
+
+AlgoScore is free software and released under the terms of
+http://www.gnu.org/licenses/gpl.html[GNU General Public License].
+
+image::example.png[]
+
+The score
+~~~~~~~~~
+Each object can have many inputs and outputs,
+and the outputs can be connected to multiple objects and inputs. Different
+objects can also be used as input at different times.
+This allows the creation of complex networks where graphical objects react
+on each other. Since the objects exists in a timeline, this network is not
+static but can change over time.
+
+Objects can visualize their data directly in the score, which is a helpful
+aid in the process of algorithmic composition. When the composer changes a
+connection, moves an object, or alters some property of an object, the
+resultant change is immediately updated in the visual representation.
+
+The kind of data sent between objects (and visualized by objects) is mostly
+either discrete events with arbitrary parameters, or continuous numerical
+control data as an array of values or as interpolated break-point curves.
+But any kind of data can be sent: strings, vectors, tables, or even functions
+or references to other objects.
+
+Since the composer works directly with the score, there's no need for an
+additional step of creating a graphical score of the piece. The
+score is already there, and can be exported to PDF for printing or publishing.
+
+Output
+~~~~~~
+The result is output to MIDI and http://www.csounds.com[CSound]
+through special output bus objects.
+
+The csound bus takes events, control data
+and function tables from other objects and sends them to CSound, which renders
+it to audio in a background process. The audio can then be played back through
+http://jackaudio.org/JACK[JACK Audio Connection Kit], or exported to a
+soundfile. You can start playback before the rendering is finished, much like
+when streaming media from the web.
+
+The midi bus takes note events and control data and sends it to a
+JACK midiport. Midi file export is coming soon...
+
+Methods for dealing with audio directly in AlgoScore for synthesis and DSP is
+also beeing considered. This could then be combined with CSound through audio
+input/output to the csound bus.
+
+Non-realtime
+~~~~~~~~~~~~
+AlgoScore has a non-realtime perspective, where the composer can relate freely
+to time and construct the composition outside of time. This makes AlgoScore more
+like a traditional sequencer in this regard, but a graphical algorithmic
+sequencer with powerful and flexible scripting abilities.
+
+The non-realtime
+concept also means that an object has the ability to access 'all' data of
+another object in a single moment, instead of beeing limited to the streaming
+data of a current "now" as in the usual pipeline architecture of many other
+applications.
+
+Scripting
+~~~~~~~~~
+AlgoScore is highly customizable and extendible with the
+http://plausible.org/nasal[Nasal] scripting language.
+
+It's relatively easy to make your own classes (types of objects) from scratch or
+derived from an existing class, and there are also classes that allow the
+composer to use nasal code directly in the score for generating or transforming
+events or control data. Each connection also has a 'transfer func' property, allowing
+the data to be transformed according to nasal code (a simple mathematical expression,
+for example). There's also classes with similar features.
+
+The advanced user can build their own library of custom classes and functions.
+
+Actually, most of AlgoScore is written in Nasal, with a core written in C.
+AlgoScore has a built-in Nasal interpreter (with bindings to gtk, cairo, csound, and more)
+that can be used to access the score
+and objects programatically, or even create your own GUI applications from scratch.
+
+Future
+~~~~~~
+AlgoScore is work-in-progress, there is bugs to be fixed, features to be implemented,
+new classes to be added, code to be optimized. There might even be big changes in
+the core of AlgoScore (for example some kind of type-system is considered for
+better handling of communication between objects). In other words, there is lots to be done!
+
+And when AlgoScore is stable, there will always be new classes added and contributed
+by the hopefully growing community.

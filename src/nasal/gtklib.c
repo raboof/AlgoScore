@@ -1,0 +1,1432 @@
+/*
+  Copyright 2006, 2007, 2008 Jonatan Liljedahl, Andrew Ross
+ 
+  This file is part of Nasal.
+ 
+  Nasal is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Library General Public
+  License as published by the Free Software Foundation; either
+  version 2 of the License, or (at your option) any later version.
+
+  Nasal is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Library General Public License for more details.
+
+  You should have received a copy of the GNU Library General Public
+  License along with Nasal; if not, write to the Free
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+#include <gtk/gtk.h>
+#include <gdk/gdk.h>
+#include <glib.h>
+
+#include "nasal.h"
+#include "gtklib.h"
+
+// From cairolib.c
+naRef naNewCairoGhost(naContext ctx, cairo_t *cr);
+
+/*
+TODO:
+- remove/destroy signal handler
+- add all(?) gdk event types
+*/
+
+#define NASTR(b) naStr_fromdata(naNewString(ctx), (char*)(b), strlen(b))
+
+static naRef namespace;
+
+static void objectGhostDestroy(void* g) { g_object_unref(g); }
+
+static naGhostType gObjectGhostType = { objectGhostDestroy, "GObject" };
+
+static naRef timers, closures;
+
+// Takes a reference to an existing GObject
+static naRef object2ghost(naContext ctx, void *o)
+{
+    return o ? naNewGhost(ctx,&gObjectGhostType,g_object_ref_sink(o)) : naNil();
+}
+
+static GObject *ghost2object(naRef r)
+{
+    return (naGhost_type(r) == &gObjectGhostType) ? naGhost_ptr(r) : 0;
+}
+
+// Argument validation predicates
+static naRef chkarg(naContext ctx, int n, int ac, naRef *av, const char* fn)
+{
+    if(n >= ac) naRuntimeError(ctx, "not enough arguments to gtk.%s", fn);
+    return av[n];
+}
+static naRef strarg(naContext ctx, int n, int ac, naRef *av, const char* fn)
+{
+    naRef r = naStringValue(ctx, chkarg(ctx, n, ac, av, fn));
+    if(naIsNil(r)) naRuntimeError(ctx, "arg %d to gtk.%s not string", n+1, fn);
+    return r;
+}
+static naRef funcarg(naContext ctx, int n, int ac, naRef *av, const char* fn)
+{
+    naRef r = chkarg(ctx, n, ac, av, fn);
+    if(!naIsFunc(r))
+        naRuntimeError(ctx, "arg %d to gtk.%s not function", n+1, fn);
+    return r;
+}
+static double numarg(naContext ctx, int n, int ac, naRef *av, const char* fn)
+{
+    naRef r = naNumValue(chkarg(ctx, n, ac, av, fn));
+    if(naIsNil(r)) naRuntimeError(ctx, "arg %d to gtk.%s not number", n+1, fn);
+    return r.num;
+}
+void* gobjarg(naContext ctx, int n, int ac, naRef *av, const char* fn)
+{
+    naRef r = chkarg(ctx, n, ac, av, fn);
+    if(naGhost_type(r) != &gObjectGhostType)
+        naRuntimeError(ctx, "argument %d to gtk.%s not GObject", n+1, fn);
+    return naGhost_ptr(r);
+}
+
+// Even simpler usage based on convention: these are to be used *only* in
+// functions name f_<name>, with parameters named ctx, argc, and args.
+#define STRARG(n) strarg(ctx, (n), argc, args, (__FUNCTION__+2))
+#define FUNCARG(n) funcarg(ctx, (n), argc, args, (__FUNCTION__+2))
+#define NUMARG(n) numarg(ctx, (n), argc, args, (__FUNCTION__+2))
+#define OBJARG(n) gobjarg(ctx, (n), argc, args, (__FUNCTION__+2))
+
+static gchar *get_stack_trace(naContext ctx)
+{
+    int i;
+    char *buf = g_strdup_printf("%s\n  at %s, line %d\n", naGetError(ctx),
+        naStr_data(naGetSourceFile(ctx, 0)), naGetLine(ctx, 0));
+
+    for(i=1; i<naStackDepth(ctx); i++) {
+        char *o = buf;
+        char *s = g_strdup_printf("  called from: %s, line %d\n",
+            naStr_data(naGetSourceFile(ctx, i)), naGetLine(ctx, i));
+        buf = g_strconcat(buf,s,NULL);
+        g_free(o);
+        g_free(s);
+    }
+    return buf;
+}
+
+static guint nasal2flags(naContext ctx, naRef in, GType t) {
+    GFlagsClass *tc = g_type_class_ref(t);
+    naRef keys = naNewVector(ctx);
+    int i;
+    guint flags=0;
+
+    if(!naIsHash(in))
+        naRuntimeError(ctx,"flags not a hash");
+    naHash_keys(keys,in);
+    for(i=0;i<naVec_size(keys);i++) {
+        naRef fl = naStringValue(ctx,naVec_get(keys,i));
+        gchar *name = naStr_data(fl);
+        GFlagsValue *v = g_flags_get_value_by_nick(tc,name);
+        if(!v) v = g_flags_get_value_by_name(tc,name);
+        if(!v) naRuntimeError(ctx,"Flag not found: %s",name);
+        if(naTrue(fl)) flags |= v->value;
+    }
+    g_type_class_unref(tc);
+    return flags;
+}
+
+static naRef flags2nasal(naContext ctx, guint state, GType type) {
+    GFlagsClass *c = g_type_class_ref(type);
+    naRef ret = naNewHash(ctx);
+    while(state) {
+        GFlagsValue *v = g_flags_get_first_value(c,state);
+        if(!v) break;
+        naAddSym(ctx,ret,(char*)v->value_nick,naNum(1));
+        state -= v->value;
+    }
+    g_type_class_unref(c);
+    return ret;
+}
+
+static naRef enum2nasal(naContext ctx, guint e, GType type) {
+    GEnumClass *c = g_type_class_ref(type);
+    GEnumValue *v = g_enum_get_value(c,e);
+    naRef ret = NASTR(v->value_nick);
+    g_type_class_unref(c);
+    return ret;
+}
+
+#define SET_NUM(a,b) naAddSym(ctx,h,(a),naNum(b))
+#define SET_STR(a,b) naAddSym(ctx,h,(a),NASTR(b))
+#define SET_FLAGS(a,b,t) naAddSym(ctx,h,(a),flags2nasal(ctx,b,t))
+
+static naRef wrap_gdk_rectangle(naContext ctx, GdkRectangle *r) {
+    naRef h = naNewHash(ctx);
+    SET_NUM("width",r->width);
+    SET_NUM("height",r->height);
+    SET_NUM("x",r->x);
+    SET_NUM("y",r->y);
+    return h;
+}
+
+static naRef wrap_gdk_color(naContext ctx, GdkColor *c) {
+    naRef h = naNewHash(ctx);
+    SET_NUM("red",c->red/65535.0);
+    SET_NUM("green",c->green/65535.0);
+    SET_NUM("blue",c->blue/65535.0);
+    return h;
+}
+
+static naRef wrap_gdk_event(naContext ctx, GdkEvent *ev) {
+    naRef h = naNewHash(ctx);
+    GEnumClass *tc = g_type_class_ref(GDK_TYPE_EVENT_TYPE);
+    GEnumValue *v = g_enum_get_value(tc,ev->type);
+
+    SET_STR("type",v->value_nick);
+    g_type_class_unref(tc);
+
+    switch(ev->type) {
+        case GDK_KEY_PRESS:
+        case GDK_KEY_RELEASE:
+            SET_NUM("time",ev->key.time);
+            SET_FLAGS("state",ev->key.state,GDK_TYPE_MODIFIER_TYPE);
+            SET_NUM("keyval",ev->key.keyval);
+            SET_STR("keyval_name",gdk_keyval_name(ev->key.keyval));
+            SET_NUM("hardware_keycode",ev->key.hardware_keycode);
+            SET_NUM("group",ev->key.group);
+        break;
+        case GDK_BUTTON_PRESS:
+        case GDK_2BUTTON_PRESS:
+        case GDK_3BUTTON_PRESS:
+        case GDK_BUTTON_RELEASE:
+            SET_NUM("time",ev->button.time);
+            SET_NUM("x",ev->button.x);
+            SET_NUM("y",ev->button.y);
+            SET_NUM("x_root",ev->button.x_root);
+            SET_NUM("y_root",ev->button.y_root);
+            SET_FLAGS("state",ev->button.state,GDK_TYPE_MODIFIER_TYPE);
+            SET_NUM("button",ev->button.button);
+        break;
+        case GDK_MOTION_NOTIFY:
+            SET_NUM("time",ev->motion.time);
+            SET_NUM("x",ev->motion.x);
+            SET_NUM("y",ev->motion.y);
+            SET_NUM("x_root",ev->motion.x_root);
+            SET_NUM("y_root",ev->motion.y_root);
+            SET_FLAGS("state",ev->button.state,GDK_TYPE_MODIFIER_TYPE);
+        break;
+        case GDK_EXPOSE:
+            SET_NUM("count",ev->expose.count);
+            SET_NUM("area_x",ev->expose.area.x);
+            SET_NUM("area_y",ev->expose.area.y);
+            SET_NUM("area_width",ev->expose.area.width);
+            SET_NUM("area_height",ev->expose.area.height);
+        break;
+        case GDK_ENTER_NOTIFY:
+        case GDK_LEAVE_NOTIFY:
+            SET_NUM("time",ev->crossing.time);
+            SET_NUM("x",ev->crossing.x);
+            SET_NUM("y",ev->crossing.y);
+            SET_NUM("x_root",ev->crossing.x_root);
+            SET_NUM("y_root",ev->crossing.y_root);
+            SET_NUM("focus",ev->crossing.focus);
+            SET_FLAGS("state",ev->button.state,GDK_TYPE_MODIFIER_TYPE);
+        break;
+        case GDK_CONFIGURE:
+            SET_NUM("x",ev->configure.x);
+            SET_NUM("y",ev->configure.y);
+            SET_NUM("width",ev->configure.width);
+            SET_NUM("height",ev->configure.height);
+        break;
+        case GDK_SCROLL:
+            SET_NUM("time",ev->scroll.time);
+            SET_NUM("x",ev->scroll.x);
+            SET_NUM("y",ev->scroll.y);
+            SET_NUM("x_root",ev->scroll.x_root);
+            SET_NUM("y_root",ev->scroll.y_root);
+            SET_FLAGS("state",ev->scroll.state,GDK_TYPE_MODIFIER_TYPE);
+            naAddSym(ctx,h,"direction",enum2nasal(ctx,ev->scroll.direction,GDK_TYPE_SCROLL_DIRECTION));
+        break;
+    default:
+        return naNil();
+    }
+    return h;
+}
+
+#undef SET_NUM
+#undef SET_STR
+#undef SET_FLAGS
+
+static void n2g(naContext ctx, naRef in, GValue *out)
+{
+#define CHECK_NUM(T,t) \
+    if(G_VALUE_HOLDS_##T(out)) g_value_set_##t(out,naNumValue(in).num); else
+
+    CHECK_NUM(BOOLEAN,boolean)
+    CHECK_NUM(CHAR,char)
+    CHECK_NUM(UCHAR,uchar)
+    CHECK_NUM(INT,int)
+    CHECK_NUM(UINT,uint)
+    CHECK_NUM(LONG,long)
+    CHECK_NUM(ULONG,ulong)
+    CHECK_NUM(INT64,int64)
+    CHECK_NUM(UINT64,uint64)
+    CHECK_NUM(FLOAT,float)
+    CHECK_NUM(DOUBLE,double)
+    if(G_VALUE_HOLDS_ENUM(out)) {
+        GEnumClass *tc = g_type_class_ref(G_VALUE_TYPE(out));
+        gchar *name = naStr_data(naStringValue(ctx,in));
+        GEnumValue *v = g_enum_get_value_by_nick(tc,name);
+        if(!v) v = g_enum_get_value_by_name(tc,name);
+        if(v) g_value_set_enum(out,v->value);
+        else naRuntimeError(ctx,"Enum not found: %s",name);
+        g_type_class_unref(tc);
+    } else
+    if(G_VALUE_HOLDS_FLAGS(out)) {
+        g_value_set_flags(out,nasal2flags(ctx,in,G_VALUE_TYPE(out)));
+    } else
+    if(G_VALUE_HOLDS_STRING(out)) {
+        g_value_set_string(out,naStr_data(naStringValue(ctx,in)));
+    } else
+    if(G_VALUE_HOLDS_OBJECT(out)) {
+        g_value_set_object(out,ghost2object(in));
+    } else
+    if(G_VALUE_HOLDS(out,GDK_TYPE_COLOR)) {
+        GdkColor col;
+        col.pixel = 0;
+        col.red = 65535*naNumValue(naHash_cget(in,"red")).num;
+        col.green = 65535*naNumValue(naHash_cget(in,"green")).num;
+        col.blue = 65535*naNumValue(naHash_cget(in,"blue")).num;
+        g_value_set_boxed(out,&col);
+    } else
+        naRuntimeError(ctx,"Can't convert to type %s\n",G_VALUE_TYPE_NAME(out));
+#undef CHECK_NUM
+}
+
+static naRef g2n(naContext ctx, const GValue *in)
+{
+#define CHECK_NUM(T,t) \
+    if(G_VALUE_HOLDS_##T(in)) return naNum(g_value_get_##t(in)); else
+
+    CHECK_NUM(BOOLEAN,boolean)
+    CHECK_NUM(CHAR,char)
+    CHECK_NUM(UCHAR,uchar)
+    CHECK_NUM(INT,int)
+    CHECK_NUM(UINT,uint)
+    CHECK_NUM(LONG,long)
+    CHECK_NUM(ULONG,ulong)
+    CHECK_NUM(INT64,int64)
+    CHECK_NUM(UINT64,uint64)
+    CHECK_NUM(FLOAT,float)
+    CHECK_NUM(DOUBLE,double)
+    if(G_VALUE_HOLDS_STRING(in)) {
+        return NASTR(g_value_get_string(in));
+    } else if(G_VALUE_HOLDS_OBJECT(in)) {
+        return object2ghost(ctx,g_value_get_object(in));
+    } else if(G_VALUE_HOLDS(in,GTK_TYPE_TREE_PATH)) {
+        gchar *path = gtk_tree_path_to_string((GtkTreePath*)g_value_get_boxed(in));
+        naRef ret = NASTR(path);
+        g_free(path);
+        return ret;
+    } else if(G_VALUE_HOLDS_FLAGS(in)) {
+        return flags2nasal(ctx,g_value_get_flags(in),G_VALUE_TYPE(in));
+    } else if(G_VALUE_HOLDS_ENUM(in)) {
+        return enum2nasal(ctx,g_value_get_enum(in),G_VALUE_TYPE(in));
+    } else if(G_VALUE_HOLDS(in,GDK_TYPE_EVENT)) {
+        return wrap_gdk_event(ctx,g_value_get_boxed(in));
+    } else if(G_VALUE_HOLDS(in,GDK_TYPE_RECTANGLE)) {
+        return wrap_gdk_rectangle(ctx,g_value_get_boxed(in));
+    } else if(G_VALUE_HOLDS(in,GDK_TYPE_COLOR)) {
+        return wrap_gdk_color(ctx,g_value_get_boxed(in));
+    } else {
+        naRuntimeError(ctx,"Can't convert from type %s\n",G_VALUE_TYPE_NAME(in));
+    }
+    return naNil();
+#undef CHECK_NUM
+}
+
+// Frustrating.  Initialize all known GLib types so that the runtime
+// table is properly populated.  Wastes memory...
+static void init_all_types()
+{
+    volatile GType x; // dummy, so the calls don't get optimized out
+#define GT(t) (x = (gtk_##t##_get_type)())
+    GT(about_dialog); GT(accel_flags); GT(accel_group); GT(accel_label);
+    GT(accel_map); GT(accessible); GT(action); GT(action_group);
+    GT(adjustment); GT(alignment); GT(anchor_type); GT(arg_flags); GT(arrow);
+    GT(arrow_type); GT(aspect_frame); GT(attach_options); GT(bin); GT(border);
+    GT(box); GT(button_action); GT(button_box); GT(button_box_style);
+    GT(button); GT(buttons_type); GT(calendar_display_options); GT(calendar);
+    GT(cell_editable); GT(cell_layout); GT(cell_renderer_combo);
+    GT(cell_renderer); GT(cell_renderer_mode); GT(cell_renderer_pixbuf);
+    GT(cell_renderer_progress); GT(cell_renderer_state);
+    GT(cell_renderer_text); GT(cell_renderer_toggle); GT(cell_type);
+    GT(cell_view); GT(check_button); GT(check_menu_item); GT(clipboard);
+    GT(clist_drag_pos); GT(color_button);
+    GT(color_selection_dialog); GT(color_selection); GT(combo_box_entry);
+    GT(combo_box); GT(container); GT(corner_type);
+    GT(ctree_expander_style); GT(ctree_expansion_type);
+    GT(ctree_line_style); GT(ctree_pos); GT(curve);
+    GT(curve_type); GT(debug_flag); GT(delete_type); GT(dest_defaults);
+    GT(dialog_flags); GT(dialog); GT(direction_type); GT(drawing_area);
+    GT(editable); GT(entry_completion); GT(entry); GT(event_box); GT(expander);
+    GT(expander_style); GT(file_chooser_action); GT(file_chooser_button);
+    GT(file_chooser_dialog); GT(file_chooser_error); GT(file_chooser);
+    GT(file_chooser_widget); GT(file_filter_flags); GT(file_filter);
+    GT(file_selection); GT(fixed); GT(font_button); GT(font_selection_dialog);
+    GT(font_selection); GT(frame); GT(gamma_curve); GT(handle_box); GT(hbox);
+    GT(hbutton_box); GT(hpaned); GT(hruler); GT(hscale); GT(hscrollbar);
+    GT(hseparator); GT(icon_factory); GT(icon_info); GT(icon_lookup_flags);
+    GT(icon_set); GT(icon_size); GT(icon_source); GT(icon_theme_error);
+    GT(icon_theme); GT(icon_view); GT(identifier); GT(image);
+    GT(image_menu_item); GT(image_type); GT(im_context); GT(im_context_simple);
+    GT(im_multicontext); GT(im_preedit_style); GT(im_status_style);
+    GT(input_dialog); GT(invisible); GT(item);
+    GT(justification); GT(label); GT(layout);
+    GT(list_store); GT(match_type); GT(menu_bar); GT(menu_direction_type);
+    GT(menu); GT(menu_item); GT(menu_shell); GT(menu_tool_button);
+    GT(message_dialog); GT(message_type); GT(metric_type); GT(misc);
+    GT(movement_step); GT(notebook); GT(notebook_tab); GT(object_flags);
+    GT(object); GT(orientation);
+    GT(pack_type); GT(paned); GT(path_priority_type); GT(path_type);
+    GT(plug); GT(policy_type); GT(position_type);
+    GT(preview_type); GT(private_flags); GT(progress_bar);
+    GT(progress_bar_orientation); GT(progress_bar_style);
+    GT(radio_action); GT(radio_button); GT(radio_menu_item);
+    GT(radio_tool_button); GT(range); GT(rc_flags); GT(rc_style);
+    GT(rc_token_type); GT(relief_style); GT(requisition); GT(resize_mode);
+    GT(response_type); GT(ruler); GT(scale); GT(scrollbar);
+    GT(scrolled_window); GT(scroll_step); GT(scroll_type); GT(selection_data);
+    GT(selection_mode); GT(separator); GT(separator_menu_item);
+    GT(separator_tool_item); GT(settings); GT(shadow_type); GT(side_type);
+    GT(signal_run_type); GT(size_group); GT(size_group_mode); GT(socket);
+    GT(sort_type); GT(spin_button); GT(spin_button_update_policy);
+    GT(spin_type); GT(state_type); GT(statusbar); GT(style);
+    GT(submenu_direction); GT(submenu_placement); GT(table); GT(target_flags);
+    GT(tearoff_menu_item); GT(text_attributes); GT(text_buffer);
+    GT(text_child_anchor); GT(text_direction); GT(text_iter); GT(text_mark);
+    GT(text_search_flags); GT(text_tag); GT(text_tag_table); GT(text_view);
+    GT(text_window_type); GT(toggle_action); GT(toggle_button);
+    GT(toggle_tool_button); GT(toolbar_child_type); GT(toolbar);
+    GT(toolbar_space_style); GT(toolbar_style); GT(tool_button); GT(tool_item);
+    GT(tooltips); GT(tree_drag_dest); GT(tree_drag_source); GT(tree_iter);
+    GT(tree_model_filter); GT(tree_model_flags); GT(tree_model);
+    GT(tree_model_sort); GT(tree_path); GT(tree_row_reference);
+    GT(tree_selection); GT(tree_sortable); GT(tree_store);
+    GT(tree_view_column); GT(tree_view_column_sizing);
+    GT(tree_view_drop_position); GT(tree_view); GT(tree_view_mode);
+    GT(ui_manager); GT(ui_manager_item_type); GT(update_type); GT(vbox);
+    GT(vbutton_box); GT(viewport); GT(visibility); GT(vpaned); GT(vruler);
+    GT(vscale); GT(vscrollbar); GT(vseparator); GT(widget_flags); GT(widget);
+    GT(widget_help_type); GT(window); GT(window_group); GT(window_position);
+    GT(window_type); GT(wrap_mode);
+#undef GT
+#define GT(t) (x = (gdk_##t##_get_type)())
+    GT(axis_use); GT(byte_order); GT(cap_style); GT(color); GT(colormap);
+    GT(colorspace); GT(crossing_mode); GT(cursor); GT(cursor_type); GT(device);
+    GT(display); GT(display_manager); GT(drag_action); GT(drag_context);
+    GT(drag_protocol); GT(drawable); GT(event); GT(event_mask); GT(event_type);
+    GT(extension_mode); GT(fill); GT(fill_rule); GT(filter_return);
+    GT(font_type); GT(function); GT(gc); GT(gc_values_mask); GT(grab_status);
+    GT(gravity); GT(image); GT(image_type); GT(input_condition);
+    GT(input_mode); GT(input_source); GT(interp_type); GT(join_style);
+    GT(keymap); GT(line_style); GT(modifier_type); GT(notify_type);
+    GT(overlap_type); GT(owner_change); GT(pango_renderer); GT(pixbuf);
+    GT(pixbuf_alpha_mode); GT(pixbuf_animation); GT(pixbuf_animation_iter);
+    GT(pixbuf_error); GT(pixbuf_loader); GT(pixbuf_rotation); GT(pixmap);
+    GT(property_state); GT(prop_mode); GT(rectangle); GT(rgb_dither);
+    GT(screen); GT(scroll_direction); GT(setting_action); GT(status);
+    GT(subwindow_mode); GT(visibility_state); GT(visual); GT(visual_type);
+    GT(window_attributes_type); GT(window_class); GT(window_edge);
+    GT(window_hints); GT(window_object); GT(window_state); GT(window_type);
+    GT(window_type_hint); GT(wm_decoration); GT(wm_function);
+#undef GT
+}
+
+typedef struct {
+    GClosure closure;
+    naRef callback;
+    naRef tag;
+} NasalClosure;
+
+static naRef do_call(naContext ctx, naRef code, int argc, naRef* args)
+{
+    naRef result;
+    naModUnlock();
+    result = naCall(ctx, code, argc, args, naNil(), naNil());
+    naModLock();
+    if(naGetError(ctx)) {
+        gchar *trace = get_stack_trace(ctx);
+        g_printerr("Nasal Error: %s", trace);
+        g_free(trace);
+    }
+    return result;
+}
+
+static void nasal_marshal(NasalClosure *closure, GValue *retval, guint n_parms,
+                          const GValue *parms, gpointer hint, gpointer data)
+{
+    int i;
+    naContext ctx = naNewContext();
+    naRef result, *args = g_alloca(sizeof(naRef) * n_parms);
+    naModLock();
+    for(i=0;i<n_parms;i++)
+        args[i] = g2n(ctx,&parms[i]);
+    result = do_call(ctx, closure->callback, n_parms, args);
+    if(retval && G_VALUE_TYPE(retval))
+        n2g(ctx,result,retval);
+    naFreeContext(ctx);
+    naModUnlock();
+}
+
+static gboolean closure_remover(gpointer data)
+{
+    NasalClosure *nc = (NasalClosure *)data;
+    naHash_delete(closures,nc->tag);
+//    fprintf(stderr,"Closure deleted: %g\n",nc->tag.num);
+    return FALSE;
+}
+
+static void nasal_closure_finalize(gpointer notify_data, GClosure *closure)
+{
+//    fprintf(stderr,"Closure deletion scheduled: %g\n",((NasalClosure *)closure)->tag.num);
+    g_idle_add(closure_remover,(gpointer)closure);
+}
+
+static NasalClosure *new_nasal_closure(naRef callback)
+{
+    NasalClosure* nc = (NasalClosure*)g_closure_new_simple(sizeof(*nc), 0);
+    nc->callback = callback;
+    g_closure_add_finalize_notifier((void*)nc, 0, nasal_closure_finalize);
+    g_closure_set_marshal((void*)nc,(GClosureMarshal)nasal_marshal);
+    return nc;
+}
+
+static naRef f_connect(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GObject *w = OBJARG(0);
+    gchar *s = naStr_data(STRARG(1));
+    naRef func = FUNCARG(2);
+    if(argc>3) g_printerr("Warning: obsolete data arg to gtk.connect\n");
+    NasalClosure *closure = new_nasal_closure(func);
+    gulong tag = g_signal_connect_closure(w,s,(GClosure*)closure,FALSE);
+    closure->tag = naNum(tag);
+    // save from garbage collection
+    naHash_set(closures, closure->tag, func);
+    return naNum(tag);
+}
+
+static naRef f_new(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GObject *obj;
+    GObjectClass *klass;
+    GParameter *parms;
+    int i,p,n_parms = (argc-1)/2;
+    naRef t_name = STRARG(0);
+    GType t = g_type_from_name(naStr_data(t_name));
+    if(!t) naRuntimeError(ctx,"No such type: %s",naStr_data(t_name));
+    klass = G_OBJECT_CLASS(g_type_class_ref(t));
+    parms = g_alloca(sizeof(GParameter) * n_parms);
+    for(i=1,p=0;i<argc-1;i+=2,p++) {
+        GValue gval = {0,};
+        gchar *prop = naStr_data(STRARG(i));
+        GParamSpec *pspec = g_object_class_find_property(klass, prop);
+        if(!pspec) naRuntimeError(ctx,"No such property: %s",prop);
+        g_value_init(&gval,G_PARAM_SPEC_VALUE_TYPE(pspec));
+        n2g(ctx,args[i+1],&gval);
+        parms[p].name = prop;
+        parms[p].value = gval;
+    }
+    obj = g_object_newv(t,n_parms,parms);
+    g_type_class_unref(klass);
+    return object2ghost(ctx,obj);
+}
+
+static naRef f_set(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GObject *obj = OBJARG(0);
+    int i;
+    for(i=1;i<argc-1;i+=2) {
+        gchar *prop = naStr_data(STRARG(i));
+        GValue gval = {0,};
+        GObjectClass *class = G_OBJECT_GET_CLASS(obj);
+        GParamSpec* pspec = g_object_class_find_property(class, prop);
+        if(!pspec) naRuntimeError(ctx,"No such property: %s",prop);
+        g_value_init(&gval,G_PARAM_SPEC_VALUE_TYPE(pspec));
+        n2g(ctx,args[i+1],&gval);
+        naModUnlock();
+        g_object_set_property(obj,prop,&gval);
+        naModLock();
+    }
+    return args[0]; /* Return the object again */
+}
+
+static naRef f_get(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GObject *obj = OBJARG(0);
+    gchar *prop = naStr_data(STRARG(1));
+    naRef nval;
+    GValue gval = {0,};
+    GObjectClass *class = G_OBJECT_GET_CLASS(obj);
+    GParamSpec* pspec = g_object_class_find_property(class, prop);
+    if(!pspec) naRuntimeError(ctx,"No such property: %s",prop);
+    g_value_init(&gval,G_PARAM_SPEC_VALUE_TYPE(pspec));
+    g_object_get_property(obj,prop,&gval);
+    nval = g2n(ctx,&gval);
+    g_value_unset(&gval);
+    return nval;
+}
+
+static naRef f_child_set(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GObject *obj = OBJARG(0);
+    GObject *child = OBJARG(1);
+    int i;
+    for(i=2;i<argc-1;i+=2) {
+        gchar *prop = naStr_data(STRARG(i));
+        GValue gval = {0,};
+        GObjectClass *class = G_OBJECT_GET_CLASS(obj);
+        GParamSpec* pspec = gtk_container_class_find_child_property(class, prop);
+        if(!pspec) naRuntimeError(ctx,"No such property: %s",prop);
+        g_value_init(&gval,G_PARAM_SPEC_VALUE_TYPE(pspec));
+        n2g(ctx,args[i+1],&gval);
+        gtk_container_child_set_property(GTK_CONTAINER(obj),GTK_WIDGET(child),
+                                         prop,&gval);
+    }
+    return args[1]; /* Return the child */
+}
+
+static naRef f_child_get(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GObject *obj = OBJARG(0);
+    gchar *prop = naStr_data(STRARG(2));
+    naRef nval;
+    GValue gval = {0,};
+    GObjectClass *class = G_OBJECT_GET_CLASS(obj);
+    GParamSpec* pspec = gtk_container_class_find_child_property(class, prop);
+    if(!pspec) naRuntimeError(ctx,"No such property: %s",prop);
+    g_value_init(&gval,G_PARAM_SPEC_VALUE_TYPE(pspec));
+    gtk_container_child_get_property(GTK_CONTAINER(obj),
+                                     GTK_WIDGET(OBJARG(1)),prop,&gval);
+    nval = g2n(ctx,&gval);
+    g_value_unset(&gval);
+    return nval;
+}
+
+static naRef f_init(naContext ctx, naRef me, int argc, naRef* args)
+{
+    gtk_init(0,0);
+    init_all_types();
+    return naNil();
+}
+
+static naRef f_main(naContext ctx, naRef me, int argc, naRef* args)
+{
+    naModUnlock();
+    gtk_main();
+    naModLock();
+    return naNil();
+}
+
+static naRef f_main_quit(naContext ctx, naRef me, int argc, naRef* args)
+{
+    gtk_main_quit();
+    return naNil();
+}
+
+static naRef f_show_all(naContext ctx, naRef me, int argc, naRef* args)
+{
+    naModUnlock();
+    gtk_widget_show_all(OBJARG(0));
+    naModLock();
+    return naNil();
+}
+
+static gboolean _timer_wrapper(long id)
+{
+    naRef func, result, arg;
+    naModLock();
+    naContext ctx = naNewContext();
+    naHash_get(timers,arg=naNum(id),&func);
+    result = naNumValue(do_call(ctx, func, 1, &arg));
+    naModUnlock();
+    naFreeContext(ctx);
+    return naIsNil(result) ? 0 : (gboolean)result.num;
+}
+
+static void _destroy_timer(long id) { naHash_delete(timers,naNum(id)); }
+
+static naRef f_timeout_add(naContext ctx, naRef me, int argc, naRef* args)
+{
+    static long id=0;
+    guint interval = (guint)NUMARG(0);
+    naRef func = FUNCARG(1);
+    if(argc>2) g_printerr("warning: obsolete data arg to gtk.timeout_add\n");
+    gulong tag = g_timeout_add_full(G_PRIORITY_DEFAULT,interval,
+        (GSourceFunc)_timer_wrapper,(gpointer)id,(GDestroyNotify)_destroy_timer);
+
+    naHash_set(timers,naNum(id),func);
+    
+    id++;
+    return naNum(tag);
+}
+
+static naRef f_source_remove(naContext ctx, naRef me, int argc, naRef* args)
+{
+    if(argc<1) return naNil();
+    g_source_remove((gulong)NUMARG(0));
+    return naNil();
+}
+
+static naRef f_text_scroll_to_cursor(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkTextView *o = GTK_TEXT_VIEW(OBJARG(0));
+    GtkTextBuffer *buf = gtk_text_view_get_buffer(o);
+    GtkTextMark *curs = gtk_text_buffer_get_insert(buf);
+    gtk_text_view_scroll_mark_onscreen(o,curs);
+    return naNil();
+}
+
+static naRef f_text_insert(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkTextView *o = GTK_TEXT_VIEW(OBJARG(0));
+    GtkTextBuffer *buf = gtk_text_view_get_buffer(o);
+    gchar *s = naStr_data(STRARG(1));
+    gtk_text_buffer_insert_at_cursor(buf,s,-1);
+    return naNil();
+}
+
+static naRef f_text_insert_with_tag(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkTextView *o = GTK_TEXT_VIEW(OBJARG(0));
+    GtkTextBuffer *buf = gtk_text_view_get_buffer(o);
+    gchar *s = naStr_data(STRARG(1));
+    GtkTextTag *tag = GTK_TEXT_TAG(OBJARG(2));
+    GtkTextIter end;
+    gtk_text_buffer_get_end_iter(buf,&end);
+    gtk_text_buffer_insert_with_tags(buf,&end,s,-1,tag,0);
+    return naNil();
+}
+
+static naRef f_text_create_tag(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkTextView *o = GTK_TEXT_VIEW(OBJARG(0));
+    GtkTextBuffer *buf = gtk_text_view_get_buffer(o);
+    GtkTextTag *tag = gtk_text_buffer_create_tag(buf,NULL,NULL);
+    return object2ghost(ctx,tag);
+}
+
+static naRef f_queue_draw(naContext ctx, naRef me, int argc, naRef* args)
+{
+    gtk_widget_queue_draw(GTK_WIDGET(OBJARG(0)));
+    return naNil();
+}
+
+static naRef f_emit(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GObject *o = G_OBJECT(OBJARG(0));
+    gchar *signame = naStr_data(STRARG(1));
+    GType itype = G_TYPE_FROM_INSTANCE(o);
+    guint sig_id = g_signal_lookup(signame,itype);
+    GSignalQuery sigq;
+    GValue *parms, retval={0,};
+    int p,i;
+
+    if(!sig_id) naRuntimeError(ctx,"No such signal: %s",signame);
+    g_signal_query(sig_id,&sigq);
+
+    if(argc-2!=sigq.n_params)
+        naRuntimeError(ctx,"Signal %s needs %d args, got %d",signame,sigq.n_params,argc-2);
+
+    parms = g_malloc0(sizeof(GValue)*(sigq.n_params+1));
+    g_value_init(&parms[0],itype);
+    g_value_set_instance(&parms[0],o);
+
+    for(p=0,i=2;i<argc;i++,p++) {
+        GValue *parm = &parms[p+1];
+        g_value_init(parm,sigq.param_types[p]);
+        n2g(ctx,args[i],parm);
+    }
+
+    if(sigq.return_type!=G_TYPE_NONE)
+        g_value_init(&retval,sigq.return_type);
+    naModUnlock();
+    g_signal_emitv(parms,sig_id,0,&retval);
+    naModLock();
+    g_free(parms);
+
+    if(sigq.return_type==G_TYPE_NONE)
+        return naNil();
+    else
+        return g2n(ctx,&retval);
+}
+
+static naRef f_size_group_add_widget(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkSizeGroup *g = GTK_SIZE_GROUP(OBJARG(0));
+    GtkWidget *w = GTK_WIDGET(OBJARG(1));
+    gtk_size_group_add_widget(g,w);
+    return naNil();
+}    
+
+static naRef f_list_store_new(naContext ctx, naRef me, int argc, naRef* args)
+{
+    int i;
+    GType *types = g_alloca(sizeof(GType)*argc);
+    for(i=0;i<argc;i++)
+        types[i] = g_type_from_name(naStr_data(STRARG(i)));
+    return object2ghost(ctx, gtk_list_store_newv(argc,types));
+}
+
+static naRef f_tree_store_new(naContext ctx, naRef me, int argc, naRef* args)
+{
+    int i;
+    GType *types = g_alloca(sizeof(GType)*argc);
+    for(i=0;i<argc;i++)
+        types[i] = g_type_from_name(naStr_data(STRARG(i)));
+    return object2ghost(ctx, gtk_tree_store_newv(argc,types));
+}
+
+static naRef f_list_store_append(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkListStore *w = GTK_LIST_STORE(OBJARG(0));
+    GtkTreeIter ti;
+    naRef ret;
+    gchar *path;
+    gtk_list_store_append(w,&ti);
+    path = gtk_tree_model_get_string_from_iter(GTK_TREE_MODEL(w),&ti);
+    ret = NASTR(path);
+    g_free(path);
+    return ret;
+}
+
+static naRef f_list_store_set(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkListStore *w = GTK_LIST_STORE(OBJARG(0));
+    GtkTreeIter iter;
+    const gchar *path = naStr_data(STRARG(1));
+    int i;
+
+    if(!gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(w),&iter,path))
+        naRuntimeError(ctx,"No such tree path: %s",path);
+
+    for(i=2;i<argc-1;i+=2) {
+        gint column = (gint)NUMARG(i);
+        GType coltype = gtk_tree_model_get_column_type(GTK_TREE_MODEL(w),column);
+        GValue value = {0,};
+
+        g_value_init(&value,coltype);
+        n2g(ctx,args[i+1],&value);
+        gtk_list_store_set_value(w,&iter,column,&value);
+    }
+
+    return naNil();
+}
+
+static naRef f_tree_store_set(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkTreeStore *w = GTK_TREE_STORE(OBJARG(0));
+    GtkTreeIter iter;
+    const gchar *path = naStr_data(STRARG(1));
+    int i;
+
+    if(!gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(w),&iter,path))
+        naRuntimeError(ctx,"No such tree path: %s",path);
+
+    for(i=2;i<argc-1;i+=2) {
+        gint column = (gint)NUMARG(i);
+        GType coltype = gtk_tree_model_get_column_type(GTK_TREE_MODEL(w),column);
+        GValue value = {0,};
+
+        g_value_init(&value,coltype);
+        n2g(ctx,args[i+1],&value);
+        gtk_tree_store_set_value(w,&iter,column,&value);
+    }
+
+    return naNil();
+}
+
+static naRef f_list_store_remove(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkListStore *w = GTK_LIST_STORE(OBJARG(0));
+    GtkTreeIter iter;
+    const gchar *path = naStr_data(STRARG(1));
+    if(!gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(w),&iter,path))
+        naRuntimeError(ctx,"No such tree path: %s",path);
+    gtk_list_store_remove(w,&iter);
+    return naNil();
+}
+
+static naRef f_list_store_clear(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkListStore *w = GTK_LIST_STORE(OBJARG(0));
+    gtk_list_store_clear(w);
+    return naNil();
+}
+static naRef f_tree_store_clear(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkTreeStore *w = GTK_TREE_STORE(OBJARG(0));
+    gtk_tree_store_clear(w);
+    return naNil();
+}
+
+static naRef f_tree_model_get(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkTreeModel *o = GTK_TREE_MODEL(OBJARG(0));
+    GtkTreeIter iter;
+    const gchar *path = naStr_data(STRARG(1));
+    gint column = (gint)NUMARG(2);
+    GValue value = {0,};
+    naRef retval;
+    if(!gtk_tree_model_get_iter_from_string(o,&iter,path))
+        naRuntimeError(ctx,"No such tree path: %s",path);
+    gtk_tree_model_get_value(o,&iter,column,&value);
+    retval = g2n(ctx,&value);
+    g_value_unset(&value);
+    return retval;
+}
+
+static naRef f_tree_store_append(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkTreeModel *o = GTK_TREE_MODEL(OBJARG(0));
+    gchar *path = (argc>1 && !naIsNil(args[1])) ? naStr_data(STRARG(1)):0;
+    GtkTreeIter iter, parent;
+    naRef ret;
+    if(path && !gtk_tree_model_get_iter_from_string(o,&parent,(const gchar*)path))
+        naRuntimeError(ctx,"No such tree path: %s",path);
+    gtk_tree_store_append(GTK_TREE_STORE(o),&iter,path?&parent:0);
+    path = gtk_tree_model_get_string_from_iter(GTK_TREE_MODEL(o),&iter);
+    ret = NASTR(path);
+    g_free(path);
+    return ret;
+}
+
+static naRef f_cell_layout_add_cell(naContext ctx, naRef me, int argc, naRef* args)
+{
+    int i;
+    GtkCellLayout *col = GTK_CELL_LAYOUT(OBJARG(0));
+    GtkCellRenderer *cell = GTK_CELL_RENDERER(OBJARG(1));
+    gtk_cell_layout_pack_start(col, cell, (gboolean)NUMARG(2));
+    gtk_cell_layout_clear_attributes(col, cell);
+    for(i=3; i<argc-1; i+=2)
+        gtk_cell_layout_add_attribute(col, cell, naStr_data(STRARG(i)),
+                                      NUMARG(i+1));
+    return naNil();
+}
+
+static naRef f_append_column(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkTreeView *w = GTK_TREE_VIEW(OBJARG(0));
+    GtkTreeViewColumn *c = GTK_TREE_VIEW_COLUMN(OBJARG(1));
+    gtk_tree_view_append_column(w,c);
+    return naNil();
+}
+
+static naRef f_tree_view_expand_all(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkTreeView *w = GTK_TREE_VIEW(OBJARG(0));
+    gtk_tree_view_expand_all(w);
+    return naNil();
+}
+
+static naRef f_tree_view_get_selection(naContext ctx, naRef me, int argc, naRef* args)
+{
+    return object2ghost(ctx,gtk_tree_view_get_selection(OBJARG(0)));
+}
+
+static naRef f_tree_view_set_cursor(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkTreeView *o = GTK_TREE_VIEW(OBJARG(0));
+    gchar *path = naStr_data(STRARG(1));
+    GtkTreePath *tp = gtk_tree_path_new_from_string(path);
+    GtkTreeViewColumn *col = GTK_TREE_VIEW_COLUMN(OBJARG(2));
+    gboolean edit = NUMARG(3);
+    gtk_tree_view_set_cursor(o,tp,col,edit);
+    gtk_tree_path_free(tp);
+    return naNil();
+}
+    
+static naRef f_tree_selection_get_selected(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkTreeSelection *o = GTK_TREE_SELECTION(OBJARG(0));
+    GtkTreeModel *model;
+    GtkTreeIter iter;
+    gchar *path;
+    naRef ret;
+
+    if(!gtk_tree_selection_get_selected(o,&model,&iter))
+        return naNil();
+
+    path = gtk_tree_model_get_string_from_iter(model,&iter);
+    ret = NASTR(path);
+    g_free(path);
+    return ret;
+}
+
+static naRef f_tree_selection_select(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkTreeSelection *o = GTK_TREE_SELECTION(OBJARG(0));
+    gchar *path = naStr_data(STRARG(1));
+    GtkTreePath *tp = gtk_tree_path_new_from_string(path);
+    gtk_tree_selection_select_path(o,tp);
+    gtk_tree_path_free(tp);
+    return naNil();
+}
+
+static naRef f_tree_selection_unselect_all(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkTreeSelection *o = GTK_TREE_SELECTION(OBJARG(0));
+    gtk_tree_selection_unselect_all(o);
+    return naNil();
+}
+
+static naRef f_type_children(naContext ctx, naRef me, int argc, naRef* args)
+{
+    gchar *name = naStr_data(STRARG(0));
+    GType t = g_type_from_name(name);
+    GType *childs = g_type_children(t,0), *p = childs;
+    naRef v = naNewVector(ctx);
+    for(p = childs; *p; p++)
+        naVec_append(v,NASTR(g_type_name(*p)));
+    g_free(childs);
+    return v;
+}
+
+static naRef f_get_type(naContext ctx, naRef me, int argc, naRef* args)
+{
+    return NASTR(g_type_name(G_TYPE_FROM_INSTANCE(OBJARG(0))));
+}
+
+static naRef f_get_signals(naContext ctx, naRef me, int argc, naRef* args)
+{
+    guint i, nsigs=0;
+    GType t = g_type_from_name(naStr_data(STRARG(0)));
+    naRef result = naNewVector(ctx);
+    GObjectClass* gc = g_type_class_ref(t); /* doesn't work w/o this */
+    guint *sigs = g_signal_list_ids(t, &nsigs);
+    for(i=0; i<nsigs; i++) {
+        GSignalQuery sq;
+        g_signal_query(sigs[i], &sq);
+        // Technically, should also test the flags against
+        // G_SIGNAL_ACTION, but *many* classes forget to set this, so
+        // it's basically useless.
+        if(sq.itype == t) naVec_append(result, NASTR(sq.signal_name));
+    }
+    g_free(sigs);
+    g_type_class_unref(gc);
+    return result;
+}
+
+static naRef f_parent_type(naContext ctx, naRef me, int argc, naRef* args)
+{
+    gchar *type = naStr_data(STRARG(0));
+    GType par = g_type_parent(g_type_from_name(type));
+    return par?NASTR(g_type_name(par)):naNil();
+}
+
+static naRef f_cairo_create(naContext ctx, naRef me, int argc, naRef* args)
+{
+    cairo_t *cr = gdk_cairo_create(GDK_DRAWABLE(GTK_WIDGET(OBJARG(0))->window));
+    return naNewCairoGhost(ctx,cr);
+}
+
+static naRef f_set_submenu(naContext ctx, naRef me, int argc, naRef* args)
+{
+    gtk_menu_item_set_submenu(OBJARG(0), OBJARG(1));
+    return naNil();
+}
+
+static naRef f_rc_parse_string(naContext ctx, naRef me, int argc, naRef* args)
+{
+    gtk_rc_parse_string(naStr_data(STRARG(0)));
+    return naNil();
+}
+
+// Parses LISP-like strings of the form:
+//   (gtk_accel_path "<Actions>/Whatever/Something" "<Shift><Control>q")
+//   ...
+static naRef f_accel_map_parse(naContext ctx, naRef me, int argc, naRef* args)
+{
+    naRef s = STRARG(0);
+    GScanner* gs = g_scanner_new(0);
+    g_scanner_input_text(gs, naStr_data(s), naStr_len(s));
+    gtk_accel_map_load_scanner(gs);
+    g_scanner_destroy(gs);
+    return naNil();
+}
+
+static naRef f_window_add_accel_group(naContext ctx, naRef me, int argc, naRef* args)
+{
+    gtk_window_add_accel_group(OBJARG(0), OBJARG(1));
+    return naNil();
+}
+
+static naRef f_action_set_accel_path(naContext ctx, naRef me, int argc, naRef* args)
+{
+    gtk_action_set_accel_path(OBJARG(0), naStr_data(STRARG(1)));
+    return naNil();
+}
+
+static naRef f_action_group_add_action(naContext ctx, naRef me, int argc, naRef* args)
+{
+    if(argc>2) {
+        gtk_action_group_add_action_with_accel(OBJARG(0), OBJARG(1),
+            naIsNil(args[2])?0:naStr_data(STRARG(2)));
+    } else
+        gtk_action_group_add_action(OBJARG(0), OBJARG(1));
+    return naNil();
+}
+
+// Adds all action arguments as a radio group
+static naRef f_action_group_add_radios(naContext ctx, naRef me, int argc, naRef* args)
+{
+    int i;
+    GSList* list = 0;
+    for(i=1; i<argc; i++) {
+        gtk_radio_action_set_group(OBJARG(i), list);
+        list = gtk_radio_action_get_group(OBJARG(i));
+        gtk_action_group_add_action(OBJARG(0), OBJARG(i));
+    }
+    return naNil();
+}
+
+static naRef f_ui_manager_insert_action_group(naContext ctx, naRef me,
+                                              int argc, naRef* args)
+{
+    gtk_ui_manager_insert_action_group(OBJARG(0), OBJARG(1), (int)NUMARG(2));
+    return naNil();
+}
+
+static naRef f_ui_manager_get_accel_group(naContext ctx, naRef me,
+                                          int argc, naRef* args)
+{
+    return object2ghost(ctx, (void*)gtk_ui_manager_get_accel_group(OBJARG(0)));
+}
+
+static naRef f_ui_manager_add_ui(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GError* err = 0;
+    naRef s = STRARG(1);
+    int id = gtk_ui_manager_add_ui_from_string(OBJARG(0), naStr_data(s),
+                                               naStr_len(s), &err);
+    if(!id) naRuntimeError(ctx, err->message);
+    return naNum(id);
+}
+
+static naRef f_ui_manager_remove_ui(naContext ctx, naRef me, int argc, naRef* args)
+{
+    gtk_ui_manager_remove_ui(OBJARG(0), (guint)NUMARG(1));
+    return naNil();
+}
+
+static naRef f_ui_manager_get_widget(naContext ctx, naRef me, int argc, naRef* args)
+{
+    const char* s = naStr_data(STRARG(1));
+    return object2ghost(ctx, (void*)gtk_ui_manager_get_widget(OBJARG(0), s));
+}
+
+static naRef f_toggle_action_get_active(naContext ctx, naRef me, int argc, naRef* args)
+{
+    return naNum(gtk_toggle_action_get_active(OBJARG(0)));
+}
+
+static naRef f_toggle_action_set_active(naContext ctx, naRef me, int argc, naRef* args)
+{
+    gtk_toggle_action_set_active(OBJARG(0), NUMARG(1) != 0);
+    return naNil();
+}
+
+static naRef f_file_chooser_get_filename(naContext ctx, naRef me, int argc, naRef* args)
+{
+    gchar *fn = gtk_file_chooser_get_filename(OBJARG(0));
+    return fn ? NASTR(fn) : naNil();
+}
+
+static naRef f_file_chooser_set_filename(naContext ctx, naRef me, int argc, naRef* args)
+{
+    gtk_file_chooser_set_filename(OBJARG(0), naStr_data(STRARG(1)));
+    return naNil();
+}
+
+static naRef f_file_chooser_set_current_name(naContext ctx, naRef me, int argc, naRef* args)
+{
+    gtk_file_chooser_set_current_name(OBJARG(0), naStr_data(STRARG(1)));
+    return naNil();
+}
+
+static naRef f_file_chooser_set_current_folder(naContext ctx, naRef me, int argc, naRef* args)
+{
+    gtk_file_chooser_set_current_folder(OBJARG(0), naStr_data(STRARG(1)));
+    return naNil();
+}
+
+static naRef f_dialog_add_buttons(naContext ctx, naRef me, int argc, naRef* args)
+{
+    int i;
+    GtkDialog *w = OBJARG(0);
+    for(i=1; i<argc; i+=2)
+        gtk_dialog_add_button(w, naStr_data(STRARG(i)), NUMARG(i+1));
+    return naNil();
+}
+
+static naRef f_dialog_action_area(naContext ctx, naRef me, int argc, naRef* args)
+{
+    return object2ghost(ctx, GTK_DIALOG(OBJARG(0))->action_area);
+}
+
+static naRef f_dialog_vbox(naContext ctx, naRef me, int argc, naRef* args)
+{
+    return object2ghost(ctx, GTK_DIALOG(OBJARG(0))->vbox);
+}
+
+static naRef f_dialog_run(naContext ctx, naRef me, int argc, naRef* args)
+{
+    return naNum(gtk_dialog_run(OBJARG(0)));
+}
+
+static naRef f_tooltips_set_tip(naContext ctx, naRef me, int argc, naRef* args)
+{
+    gchar *private = argc > 3 ? naStr_data(STRARG(3)) : 0;
+    gtk_tooltips_set_tip(OBJARG(0),OBJARG(1),naStr_data(STRARG(2)),private);
+    return naNil();
+}
+
+static naRef f_menu_popup(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkMenu *menu = GTK_MENU(OBJARG(0));
+    guint button = NUMARG(1);
+    guint32 time = argc>2?NUMARG(2):gtk_get_current_event_time();
+    gtk_menu_popup (menu, NULL, NULL, NULL, NULL, 
+        button, time);
+    return naNil();
+}
+static naRef f_menu_attach_to_widget(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkMenu *menu = GTK_MENU(OBJARG(0));
+    GtkWidget *wid = GTK_WIDGET(OBJARG(1));
+    gtk_menu_attach_to_widget(menu, wid, 0);
+    return naNil();
+}
+static naRef f_window_raise(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkWidget *w = GTK_WIDGET(OBJARG(0));
+    gdk_window_show(w->window);
+    return naNil();
+}
+
+static naRef f_widget_get_screen_width(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkWidget *w = GTK_WIDGET(OBJARG(0));
+    gint width = gdk_screen_get_width(gtk_widget_get_screen(w));
+    return naNum(width);
+}
+
+static naRef f_widget_set_double_buffered(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkWidget *w = GTK_WIDGET(OBJARG(0));
+    gtk_widget_set_double_buffered(w,NUMARG(1));
+    return naNil();
+}
+
+static naRef f_main_iterate_while_events(naContext ctx, naRef me, int argc, naRef* args)
+{
+    naModUnlock();
+    while (gtk_events_pending()) gtk_main_iteration();
+    naModLock();
+    return naNil();
+}
+
+static naRef f_set_default_icon_from_file(naContext ctx, naRef me, int argc, naRef* args)
+{
+    return naNum(gtk_window_set_default_icon_from_file(naStr_data(STRARG(0)),0));
+}
+
+static naRef f_check_version(naContext ctx, naRef me, int argc, naRef* args)
+{
+    guint major = NUMARG(0);
+    guint minor = NUMARG(1);
+    guint micro = NUMARG(2);
+    const gchar *res = gtk_check_version(major,minor,micro);
+    return res?NASTR(res):naNil();
+}
+
+static naRef f_set_cursor(naContext ctx, naRef me, int argc, naRef* args)
+{
+    GtkWidget *w = GTK_WIDGET(OBJARG(0));
+    GdkCursor *curs = naIsNil(args[1])?NULL:gdk_cursor_new(NUMARG(1));
+    gdk_window_set_cursor(w->window,curs);
+    if(curs) gdk_cursor_unref(curs);
+    return naNil();
+}
+
+static naCFuncItem funcs[] = {
+    { "set_cursor", f_set_cursor },
+// Needed to make UIManager & menus work (yuck!):
+    { "accel_map_parse", f_accel_map_parse },
+    { "window_add_accel_group", f_window_add_accel_group },
+    { "action_set_accel_path", f_action_set_accel_path },
+    { "action_group_add_action", f_action_group_add_action },
+    { "action_group_add_radios", f_action_group_add_radios },
+    { "ui_manager_insert_action_group", f_ui_manager_insert_action_group },
+    { "ui_manager_get_accel_group", f_ui_manager_get_accel_group },
+    { "ui_manager_add_ui", f_ui_manager_add_ui },
+    { "ui_manager_remove_ui", f_ui_manager_remove_ui },
+    { "ui_manager_get_widget", f_ui_manager_get_widget },
+    { "menu_item_set_submenu", f_set_submenu },
+    { "toggle_action_get_active", f_toggle_action_get_active },
+    { "toggle_action_set_active", f_toggle_action_set_active },
+    { "menu_popup", f_menu_popup },
+    { "menu_attach_to_widget", f_menu_attach_to_widget },
+//special methods
+    { "list_store_new", f_list_store_new },
+    { "list_store_append", f_list_store_append },
+    { "list_store_remove", f_list_store_remove },
+    { "list_store_set", f_list_store_set },
+    { "list_store_clear", f_list_store_clear },
+    { "tree_view_get_selection", f_tree_view_get_selection },
+    { "tree_view_set_cursor", f_tree_view_set_cursor },
+    { "cell_layout_add_cell", f_cell_layout_add_cell },
+    { "tree_view_append_column", f_append_column },
+    { "tree_view_expand_all", f_tree_view_expand_all },
+    { "tree_selection_get_selected", f_tree_selection_get_selected },
+    { "tree_selection_select", f_tree_selection_select },
+    { "tree_selection_unselect_all", f_tree_selection_unselect_all },
+    { "tree_model_get", f_tree_model_get },
+    { "tree_store_set", f_tree_store_set },
+    { "tree_store_new", f_tree_store_new },
+    { "tree_store_append", f_tree_store_append },
+    { "tree_store_clear", f_tree_store_clear },
+    { "text_view_insert", f_text_insert },
+    { "text_view_insert_with_tag", f_text_insert_with_tag },
+    { "text_view_scroll_to_cursor", f_text_scroll_to_cursor },
+    { "text_view_create_tag", f_text_create_tag },
+    { "widget_cairo_create", f_cairo_create },
+    { "widget_queue_draw", f_queue_draw },
+    { "widget_show_all", f_show_all },
+    { "widget_get_screen_width", f_widget_get_screen_width },
+    { "widget_set_double_buffered", f_widget_set_double_buffered },
+    { "window_raise", f_window_raise },
+    { "rc_parse_string", f_rc_parse_string },
+    { "size_group_add_widget", f_size_group_add_widget },
+    { "file_chooser_get_filename", f_file_chooser_get_filename },
+    { "file_chooser_set_filename", f_file_chooser_set_filename },
+    { "file_chooser_set_current_name", f_file_chooser_set_current_name },
+    { "file_chooser_set_current_folder", f_file_chooser_set_current_folder },
+    { "dialog_add_buttons", f_dialog_add_buttons },
+    { "dialog_action_area", f_dialog_action_area },
+    { "dialog_vbox", f_dialog_vbox },
+    { "dialog_run", f_dialog_run },
+    { "tooltips_set_tip", f_tooltips_set_tip },
+    { "set_default_icon_from_file", f_set_default_icon_from_file },
+//core stuff
+    { "check_version", f_check_version },
+    { "get_signals", f_get_signals },
+    { "parent_type", f_parent_type },
+    { "get_type", f_get_type },
+    { "type_children", f_type_children },
+    { "new", f_new },
+    { "init", f_init },
+    { "main", f_main },
+    { "main_quit", f_main_quit },
+    { "main_iterate_while_events", f_main_iterate_while_events },
+    { "set", f_set },
+    { "get", f_get },
+    { "child_set", f_child_set },
+    { "child_get", f_child_get },
+    { "connect", f_connect },
+    { "emit", f_emit },
+    { "timeout_add", f_timeout_add },
+    { "source_remove", f_source_remove },
+    { 0 }
+};
+
+#define E(x) naAddSym(ctx,namespace,#x,naNum(x))
+naRef naInit_gtk(naContext ctx) {
+    namespace = naGenLib(ctx,funcs);
+    closures = naNewHash(ctx);
+    naSave(ctx,closures);
+    timers = naNewHash(ctx);
+    naSave(ctx,timers);
+    
+    E(GDK_X_CURSOR);
+    E(GDK_ARROW);
+    E(GDK_BASED_ARROW_DOWN);
+    E(GDK_BASED_ARROW_UP);
+    E(GDK_BOAT);
+    E(GDK_BOGOSITY);
+    E(GDK_BOTTOM_LEFT_CORNER);
+    E(GDK_BOTTOM_RIGHT_CORNER);
+    E(GDK_BOTTOM_SIDE);
+    E(GDK_BOTTOM_TEE);
+    E(GDK_BOX_SPIRAL);
+    E(GDK_CENTER_PTR);
+    E(GDK_CIRCLE);
+    E(GDK_CLOCK);
+    E(GDK_COFFEE_MUG);
+    E(GDK_CROSS);
+    E(GDK_CROSS_REVERSE);
+    E(GDK_CROSSHAIR);
+    E(GDK_DIAMOND_CROSS);
+    E(GDK_DOT);
+    E(GDK_DOTBOX);
+    E(GDK_DOUBLE_ARROW);
+    E(GDK_DRAFT_LARGE);
+    E(GDK_DRAFT_SMALL);
+    E(GDK_DRAPED_BOX);
+    E(GDK_EXCHANGE);
+    E(GDK_FLEUR);
+    E(GDK_GOBBLER);
+    E(GDK_GUMBY);
+    E(GDK_HAND1);
+    E(GDK_HAND2);
+    E(GDK_HEART);
+    E(GDK_ICON);
+    E(GDK_IRON_CROSS);
+    E(GDK_LEFT_PTR);
+    E(GDK_LEFT_SIDE);
+    E(GDK_LEFT_TEE);
+    E(GDK_LEFTBUTTON);
+    E(GDK_LL_ANGLE);
+    E(GDK_LR_ANGLE);
+    E(GDK_MAN);
+    E(GDK_MIDDLEBUTTON);
+    E(GDK_MOUSE);
+    E(GDK_PENCIL);
+    E(GDK_PIRATE);
+    E(GDK_PLUS);
+    E(GDK_QUESTION_ARROW);
+    E(GDK_RIGHT_PTR);
+    E(GDK_RIGHT_SIDE);
+    E(GDK_RIGHT_TEE);
+    E(GDK_RIGHTBUTTON);
+    E(GDK_RTL_LOGO);
+    E(GDK_SAILBOAT);
+    E(GDK_SB_DOWN_ARROW);
+    E(GDK_SB_H_DOUBLE_ARROW);
+    E(GDK_SB_LEFT_ARROW);
+    E(GDK_SB_RIGHT_ARROW);
+    E(GDK_SB_UP_ARROW);
+    E(GDK_SB_V_DOUBLE_ARROW);
+    E(GDK_SHUTTLE);
+    E(GDK_SIZING);
+    E(GDK_SPIDER);
+    E(GDK_SPRAYCAN);
+    E(GDK_STAR);
+    E(GDK_TARGET);
+    E(GDK_TCROSS);
+    E(GDK_TOP_LEFT_ARROW);
+    E(GDK_TOP_LEFT_CORNER);
+    E(GDK_TOP_RIGHT_CORNER);
+    E(GDK_TOP_SIDE);
+    E(GDK_TOP_TEE);
+    E(GDK_TREK);
+    E(GDK_UL_ANGLE);
+    E(GDK_UMBRELLA);
+    E(GDK_UR_ANGLE);
+    E(GDK_WATCH);
+    E(GDK_XTERM);
+    
+    return namespace;
+}

@@ -1,0 +1,3071 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>AlgoScore users guide</title>
+<meta name="generator" content="http://txt2tags.sf.net" />
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+
+<!-- Included as.css -->
+<style type="text/css">
+/* Debug borders */
+p, li, dt, dd, div, pre, h1, h2, h3, h4, h5, h6 {
+/*
+  border: 1px solid red;
+*/
+}
+
+body {
+/*  margin: 1em 5% 1em 5%;*/
+/*  margin: 1em auto 1em auto;*/
+/*  margin: 1em 3em 1em 3em;*/
+  font-size: 10pt;
+  font-family: sans-serif;
+  margin-left: 1em;
+/*  background: #777777;
+  border: 1px solid black;*/
+/*  max-width: 61em;*/
+/*  text-align: center;*/
+}
+
+/*div.body, div.header, div.toc {
+  background: white;
+  padding: 3em;
+  text-align: left;
+}
+
+div.toc {
+  border-top: 2px solid silver;
+  border-bottom: 2px solid silver;
+  padding: 2em;
+}
+*/
+
+a, a:visited {
+  color: #252585;
+  text-decoration: none;
+}
+/*a:visited {
+  color: black;
+}*/
+a:hover {
+/*  color: red;*/
+  text-decoration: underline;
+}
+
+em {
+  font-style: italic;
+}
+
+strong {
+  font-weight: bold;
+}
+
+tt {
+  color: #115533;
+}
+
+h1, h2, h3, h4, h5, h6 {
+/*  color: #526b7d;*/
+  color: #525b6d;
+/*  color: #627b8d;*/
+  font-family: sans-serif;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+/*  line-height: 1.3;*/
+}
+
+div.body h1 {
+/*  border-bottom: 2px solid silver;*/
+  background: #627b8d;
+  color: white;
+  padding: 0.2em;
+  padding-left: 0.5em;
+/*  padding-top: 0.5em;*/
+  font-size: 1.5em;
+  margin-top: 2em;
+}
+
+div.body h2 {
+  border-bottom: 2px solid silver;
+  font-size: 1.2em;
+}
+
+div.body h3 {
+/*  border-bottom: 1px solid silver;*/
+  font-size: 1em;
+}
+
+div.header h1 {
+  background: #627b8d;
+  color: white;
+  padding: 0.5em;
+/*  border-bottom: 4px solid silver;*/
+  font-size: 2.2em;
+  margin-bottom: 0.2em;
+}
+
+div.header h2, div.header h3 {
+  font-family: serif;
+  font-size: 10pt;
+  font-weight: normal;
+  margin-top: 0;
+  margin-bottom: 0.2em;
+/*  margin: 0;*/
+}
+div.header h3 {
+  font-size: 8pt;
+}
+
+div.sectionbody {
+  font-family: sans-serif;
+/*  margin-left: 0;*/
+}
+
+hr {
+  border: 1px solid silver;
+}
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  text-align: justify;
+}
+
+pre {
+  margin: 0;
+  margin-left: 1em;
+  border: 1px solid silver;
+  background: #f4f4f4;
+  padding: 0.1em;
+  color: #115533;
+}
+
+code {
+  color: #115533;
+}
+
+span.key {
+  border: 1px solid silver;
+  font-family: monospace;
+  padding: 0;
+  padding-left: 0.2em;
+  padding-right: 0.2em;
+/*  background: #ddffdd;*/
+  background: #dfdfdf;
+}
+
+div.body, div.header {
+  margin-left: 22em;
+  margin-right: 1em;
+  max-width: 61em;
+}
+
+div.toc ul li {
+  font-weight: bold;
+  margin-top: 0.5em;
+}
+
+div.toc ul li ul li {
+  font-weight: normal;
+  margin-top: 0;
+}
+
+div.toc {
+  border: 1px solid #aaaaaa;
+  background: #f0f0f0;
+/*  padding: 0.5em;*/
+/*  margin-top: 1em;*/
+/*  margin-bottom: 1em;*/
+  margin-left: 0;
+  float: left;
+  overflow: scroll;
+  position: fixed;
+  height: 98%;
+  top: 1%;
+  width: 20em;
+
+/* IE hack */
+
+  position: expression("absolute");
+  top: expression(document.body.scrollTop+this.offsetHeight-this.offsetHeight);
+}
+
+div.toc:before {
+  font-family: sans-serif;
+  font-size: 12pt;
+  font-weight: bold;
+  text-align: left;
+  margin-left: 1em;
+  display: block;
+  color: #526b7d;
+  content: "AlgoScore users guide";
+  margin-top: 0.5em;
+}
+
+span#author {
+  color: #777777; /*#527bbd;*/
+  font-family: sans-serif;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+span#email {
+}
+span#revision {
+  font-family: sans-serif;
+}
+
+div#footer {
+  font-family: sans-serif;
+  font-size: small;
+  border-top: 2px solid silver;
+  padding-top: 0.5em;
+  margin-top: 4.0em;
+}
+div#footer-text {
+  float: left;
+  padding-bottom: 0.5em;
+}
+div#footer-badges {
+  float: right;
+  padding-bottom: 0.5em;
+}
+
+div#preamble,
+div.tableblock, div.imageblock, div.exampleblock, div.verseblock,
+div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
+div.admonitionblock {
+  margin-right: 10%;
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+div.admonitionblock {
+  margin-top: 2.5em;
+  margin-bottom: 2.5em;
+}
+
+/*
+div.imageblock {
+  text-align: center;
+}
+*/
+
+div.content { /* Block element content. */
+  padding: 0;
+}
+
+/* Block element titles. */
+div.title, caption.title {
+  font-family: sans-serif;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 1.0em;
+  margin-bottom: 0.5em;
+}
+div.title + * {
+  margin-top: 0;
+}
+
+td div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content + div.title {
+  margin-top: 0.0em;
+}
+
+div.sidebarblock > div.content {
+  background: #ffffee;
+  border: 1px solid silver;
+  padding: 0.5em;
+}
+
+div.listingblock {
+  margin-right: 0%;
+}
+div.listingblock > div.content {
+  border: 1px solid silver;
+  background: #f4f4f4;
+  padding: 0.5em;
+}
+
+div.quoteblock > div.content {
+  padding-left: 2.0em;
+}
+
+div.attribution {
+  text-align: right;
+}
+div.verseblock + div.attribution {
+  text-align: left;
+}
+
+div.admonitionblock .icon {
+  vertical-align: top;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #527bbd;
+  padding-right: 0.5em;
+}
+div.admonitionblock td.content {
+  padding-left: 0.5em;
+  border-left: 2px solid silver;
+}
+
+div.exampleblock > div.content {
+  border-left: 2px solid silver;
+  padding: 0.5em;
+}
+
+div.verseblock div.content {
+  white-space: pre;
+}
+
+/*div.imageblock div.content { padding-left: 0; }
+div.imageblock */
+img { border: 1px solid silver; }
+span.image img { border-style: none; }
+
+dl {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+dt {
+  margin-top: 1em;
+  margin-bottom: 0;
+/*  font-style: italic;*/
+  font-weight: normal;
+}
+/*dd > *:first-child {
+  margin-top: 0;
+}*/
+
+ul, ol {
+  list-style-position: outside;
+  padding-left: 2em;
+}
+ol.olist2 {
+  list-style-type: lower-alpha;
+}
+
+div.tableblock > table {
+  border: 3px solid #527bbd;
+}
+thead {
+  font-family: sans-serif;
+  font-weight: bold;
+}
+tfoot {
+  font-weight: bold;
+}
+
+div.hlist {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+td.hlist1 {
+  vertical-align: top;
+/*  font-style: italic;*/
+  font-weight: bold;
+  padding-right: 0.8em;
+}
+td.hlist2 {
+  vertical-align: top;
+}
+
+@media print {
+  div#footer-badges { display: none; }
+}
+
+div#toctitle {
+  color: #526b7d;
+  font-family: sans-serif;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-bottom: 0.2em;
+}
+
+div.toclevel1, div.toclevel2 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+div.toclevel2 {
+  margin-left: 2em;
+}
+</style>
+
+</head>
+<body>
+
+<div class="header" id="header">
+<h1>AlgoScore users guide</h1>
+<h2>Copyright 2008, Jonatan Liljedahl &lt;lijon@kymatica.com&gt;</h2>
+<h3>Last edited: 2008-12-02</h3>
+</div>
+
+<div class="toc" id="toc">
+  <ul>
+  <li><a href="#toc1">Introduction</a>
+    <ul>
+    <li><a href="#toc2">The score</a>
+    </li>
+    <li><a href="#toc3">Non-realtime</a>
+    </li>
+    <li><a href="#toc4">Output</a>
+    </li>
+    <li><a href="#toc5">Scripting</a>
+    </li>
+    </ul>
+  </li>
+  <li><a href="#install">Download and install</a>
+    <ul>
+    <li><a href="#toc7">GNU/Linux</a>
+    </li>
+    <li><a href="#osxinstall">Mac OS X</a>
+    </li>
+    </ul>
+  </li>
+  <li><a href="#toc9">Getting started</a>
+  </li>
+  <li><a href="#using">Using AlgoScore</a>
+    <ul>
+    <li><a href="#toc11">Score window</a>
+    </li>
+    <li><a href="#toc12">Console</a>
+    </li>
+    <li><a href="#toc13">Creating objects</a>
+    </li>
+    <li><a href="#props">Properties</a>
+    </li>
+    <li><a href="#toc15">Connecting objects</a>
+    </li>
+    <li><a href="#toc16">Alignments and Links</a>
+    </li>
+    <li><a href="#toc17">Edit mode</a>
+    </li>
+    <li><a href="#prefs">Preferences</a>
+    </li>
+    <li><a href="#toc19">Printing</a>
+    </li>
+    <li><a href="#toc20">Exporting</a>
+    </li>
+    <li><a href="#toc21">Key and mouse bindings</a>
+    </li>
+    </ul>
+  </li>
+  <li><a href="#toc22">Getting output</a>
+    <ul>
+    <li><a href="#toc23">Csound bus</a>
+    </li>
+    <li><a href="#toc24">Control signal bus</a>
+    </li>
+    <li><a href="#toc25">OSC bus</a>
+    </li>
+    <li><a href="#toc26">MIDI bus</a>
+    </li>
+    </ul>
+  </li>
+  <li><a href="#toc27">Included classes</a>
+    <ul>
+    <li><a href="#code_class">code</a>
+    </li>
+    <li><a href="#comment_class">comment</a>
+    </li>
+    <li><a href="#comparator_class">comparator</a>
+    </li>
+    <li><a href="#cs_ftab_class">cs_ftab</a>
+    </li>
+    <li><a href="#cs_instr_class">cs_instr</a>
+    </li>
+    <li><a href="#cs_instr_graph_class">cs_instr_graph</a>
+    </li>
+    <li><a href="#csound_bus_class">csound_bus</a>
+    </li>
+    <li><a href="#datagen_class">datagen</a>
+    </li>
+    <li><a href="#evgraph_class">evgraph</a>
+    </li>
+    <li><a href="#funcbus_class">funcbus</a>
+    </li>
+    <li><a href="#graph_class">graph</a>
+    </li>
+    <li><a href="#jitter_class">jitter</a>
+    </li>
+    <li><a href="#linseg_class">linseg</a>
+    </li>
+    <li><a href="#masklinseg_class">masklinseg</a>
+    </li>
+    <li><a href="#maskshape_class">maskshape</a>
+    </li>
+    <li><a href="#midi_bus_class">midi_bus</a>
+    </li>
+    <li><a href="#morph_class">morph</a>
+    </li>
+    <li><a href="#noise_class">noise</a>
+    </li>
+    <li><a href="#osc_bus_class">osc_bus</a>
+    </li>
+    <li><a href="#recv_class">recv</a>
+    </li>
+    <li><a href="#send_class">send</a>
+    </li>
+    <li><a href="#shape_class">shape</a>
+    </li>
+    <li><a href="#signal_bus_class">signal_bus</a>
+    </li>
+    <li><a href="#sine_class">sine</a>
+    </li>
+    <li><a href="#slider_class">slider</a>
+    </li>
+    <li><a href="#timegrid_class">timegrid</a>
+    </li>
+    </ul>
+  </li>
+  <li><a href="#toc54">Programming</a>
+    <ul>
+    <li><a href="#toc55">Internals</a>
+    </li>
+    <li><a href="#toc56">Data formats and communication</a>
+    </li>
+    <li><a href="#custom">Customization</a>
+    </li>
+    <li><a href="#Score">Score class</a>
+    </li>
+    <li><a href="#ASObject">ASObject class</a>
+    </li>
+    <li><a href="#Inlet">Inlet class</a>
+    </li>
+    <li><a href="#Connection">Connection class</a>
+    </li>
+    <li><a href="#toc62">Nasal libraries</a>
+    </li>
+    </ul>
+  </li>
+  <li><a href="#examples">Examples</a>
+    <ul>
+    <li><a href="#toc64">test.orc</a>
+    </li>
+    <li><a href="#toc65">csound_test.as</a>
+    </li>
+    <li><a href="#toc66">evgen_test.as</a>
+    </li>
+    <li><a href="#toc67">midi_test.as</a>
+    </li>
+    <li><a href="#toc68">transfunc_aux_test.as</a>
+    </li>
+    </ul>
+  </li>
+  <li><a href="#osxbuild">Building on Mac OS X</a>
+    <ul>
+    <li><a href="#toc70">Dependencies</a>
+    </li>
+    <li><a href="#toc71">Configure and build</a>
+    </li>
+    <li><a href="#toc72">Testing the binary</a>
+    </li>
+    <li><a href="#toc73">Make an Application bundle</a>
+    </li>
+    </ul>
+  </li>
+  <li><a href="#toc74">Other software</a>
+    <ul>
+    <li><a href="#nasal">Nasal</a>
+    </li>
+    <li><a href="#jack">JACK</a>
+    </li>
+    <li><a href="#csound">Csound</a>
+    </li>
+    <li><a href="#libsndfile">Libsndfile</a>
+    </li>
+    <li><a href="#rox">ROX-Filer</a>
+    </li>
+    <li><a href="#gtk">GTK+</a>
+    </li>
+    <li><a href="#xcode">XCodeTools</a>
+    </li>
+    <li><a href="#macports">MacPorts</a>
+    </li>
+    <li><a href="#cmake">CMake</a>
+    </li>
+    </ul>
+  </li>
+  </ul>
+
+</div>
+<div class="body" id="body">
+<p>
+<i>The latest version of this document can be found at</i> <a href="http://download.gna.org/algoscore/Help/algoscore-manual.html">http://download.gna.org/algoscore/Help/algoscore-manual.html</a>
+</p>
+<a id="toc1" name="toc1"></a>
+<h1>Introduction</h1>
+<p>
+AlgoScore is a graphical environment for algorithmic composition, where music is
+constructed directly in an interactive graphical score. This section gives
+an introduction to the features and concepts of AlgoScore.
+</p>
+<p>
+AlgoScore is free software and a project under active development, distributed under
+the terms of <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public License</a>.
+</p>
+ <center><img align="bottom" src="example.png" border="0" alt=""/></center> 
+<a id="toc2" name="toc2"></a>
+<h2>The score</h2>
+<p>
+Graphical objects are placed in a timeline and connected together. Some objects
+are user-interactive and depend on user data, while some are generative
+and react on input from other objects. Each individual object also has a
+set of user-editable properties.
+</p>
+<p>
+Each object can have many inputs and outputs,
+and the outputs can be connected to multiple objects and inputs. Different
+objects can also be used as input at different times.
+This allows the creation of complex networks where graphical objects react
+on each other. Since the objects exists in a timeline, this network is not
+static but can change over time.
+</p>
+<p>
+Objects can visualize their data directly in the score, which is a helpful
+aid in the process of algorithmic composition. When the composer changes a
+connection, moves an object, or alters some property of an object, the
+resultant change is immediately updated in the visual representation.
+</p>
+<p>
+The kind of data sent between objects (and visualized by objects) is mostly
+either discrete events with arbitrary parameters, or continuous numerical
+control data as an array of values or as interpolated break-point curves.
+But any kind of data can be sent: strings, vectors, tables, or even functions
+or references to other objects.
+</p>
+<p>
+Since the composer works directly with the score, there's no need for an
+additional step of creating a graphical score of the piece. The
+score is already there, and can be exported to PDF for printing or publishing,
+or SVG for importing into other applications.
+</p>
+<a id="toc3" name="toc3"></a>
+<h2>Non-realtime</h2>
+<p>
+AlgoScore has a non-realtime perspective, where the composer can relate freely
+to time and construct the composition outside of time. This makes AlgoScore more
+like a traditional sequencer in this regard, but a graphical algorithmic
+sequencer with powerful and flexible scripting abilities.
+</p>
+<p>
+The non-realtime
+concept also means that an object has the ability to access <i>all</i> data of
+another object in a single moment, instead of beeing limited to the streaming
+data of a current "now". Both the composer and the individual objects are thus
+unbound by time and can relate to both past and future.
+</p>
+<a id="toc4" name="toc4"></a>
+<h2>Output</h2>
+<p>
+The data can be output from AlgoScore by connecting objects to one or more special
+output busses.
+The result is output as audio (through the built-in <a href="#csound">Csound</a> interface),
+arbitrary control signals, OSC (OpenSoundControl), or MIDI.
+</p>
+<p>
+The csound bus takes events, control data
+and function tables from other objects and sends them to csound, which renders
+it to audio in a background process according to a given orchestra file.
+The audio can then be played back through
+<a href="#jack">JACK Audio Connection Kit</a>, or exported to a
+soundfile. Playback can be started before the rendering is finished, much like
+when streaming media on the web.
+</p>
+<p>
+The control signal bus takes any numerical data, samples it in a specified
+samplerate, and sends it on a JACK port as an audio signal. This gives the
+possibility of high-resolution control of other software.
+</p>
+<p>
+The OSC bus takes events and outputs them to specified address and OSC paths.
+</p>
+<p>
+The MIDI bus takes note events and control data and sends it on a
+JACK midi port.
+</p>
+<a id="toc5" name="toc5"></a>
+<h2>Scripting</h2>
+<p>
+AlgoScore is highly customizable and extendible with the
+<a href="#nasal">Nasal</a> scripting language.
+</p>
+<p>
+It's relatively easy to make your own classes (types of objects) from scratch or
+derived from an existing class, and there are also classes that allow the
+composer to use nasal code directly in the score for generating or transforming
+events or control data. Each connection also has a <i>transfer func</i> property, allowing
+the data to be transformed according to nasal code (a simple mathematical expression,
+for example). There is also classes with similar features.
+</p>
+<p>
+The advanced user can build their own library of <a href="#custom">custom</a> classes and functions.
+It's easy for users to share classes with each other, just put the file in
+your <i>user_data</i> folder and it will be loaded automatically.
+Since the classes are written in an interpreted
+scripting language, no compilation-step is needed.
+</p>
+<p>
+Actually, most of AlgoScore is written in <a href="#nasal">Nasal</a>, with a core written in C.
+AlgoScore has a built-in Nasal interpreter  that can be used to access the score
+and objects programatically, or even create your own GUI applications from
+scratch.
+</p>
+<a id="install" name="install"></a>
+<h1>Download and install</h1>
+<p>
+AlgoScore has been tested on GNU/Linux and Mac OS X, but should probably be compilable
+on other POSIX conformant operating systems as well.
+</p>
+<p>
+AlgoScore is free software and is released under the terms of
+<a href="COPYING">GNU General Public License</a>.
+Sourcecode and binary packages are available at <a href="http://kymatica.com/algoscore">http://kymatica.com/algoscore</a>
+</p>
+<p>
+There is no need to <i>install</i> AlgoScore to a specific location,
+it's a self-contained application directory.
+</p>
+<p>
+See the <a href="ChangeLog">ChangeLog</a> for recent changes.
+</p>
+<a id="toc7" name="toc7"></a>
+<h2>GNU/Linux</h2>
+<p>
+Since version 080417 the pre-built binary was removed, you need to
+build AlgoScore from source. (see below)
+</p>
+<h3>Dependencies</h3>
+<ul>
+<li><a href="#cmake">CMake</a> 2.4.7 (build dependency only)
+</li>
+<li><a href="#jack">JACK</a> 0.100.0 (0.102.27 or later for MIDI support)
+</li>
+<li><a href="#csound">Csound</a> 5.x
+</li>
+<li><a href="#libsndfile">Libsndfile</a> 1.x
+</li>
+<li><a href="#gtk">GTK+</a> 2.8 or later
+</li>
+<li>PCRE (optional, for regex functions)
+</li>
+<li>LibLo 0.24 (optional, for OSC support)
+</li>
+</ul>
+
+<h3>Building from source</h3>
+<p>
+Make sure you have the dependencies listed above installed. Note that on a
+distro with separate dev-packages you need to install those too.
+</p>
+<p>
+You also need to install <a href="#cmake">CMake</a> 2.4.7 or later.
+</p>
+<p>
+Download the source package and unpack it somewhere,
+then do the following in the shell:
+</p>
+<pre>
+cd AlgoScore/src
+export CFLAGS="-O2"
+./make_build
+</pre>
+<p></p>
+<p>
+The "-O2" compiler flag is needed to avoid a crash due to a compiler bug.
+</p>
+<p>
+If you want to make a clean rebuild, remove the old <code>build</code> folder first.
+</p>
+<h3>Running</h3>
+<p>
+Start AlgoScore by running the <code>algoscore</code> binary
+from within the top-level directory of the AlgoScore folder. It is important
+that the binary is not moved from this location for AlgoScore
+to find the included library files. You can go to the AlgoScore folder and run it
+from there, or enter the full path, but you can not run it through a symlink.
+</p>
+<p>
+If you're using <a href="#rox">ROX-Filer</a>, you should be able to start AlgoScore
+by just double-clicking it, and it will try to compile itself the first time.
+</p>
+<p>
+The first time you start AlgoScore, it will notify you that a folder for custom userdata
+was not found and offer you to create one. The default location for this is
+<code>algoscore_data</code> under your home folder.
+</p>
+<a id="osxinstall" name="osxinstall"></a>
+<h2>Mac OS X</h2>
+<p>
+On OS X, the simplest approach is probably to download the pre-built
+AlgoScore.app application bundle.
+</p>
+<p>
+If you need or want to compile from source on OS X, see <a href="#osxbuild">this section</a>
+at the end of this document.
+</p>
+<h3>Dependencies</h3>
+<ul>
+<li><a href="#csound">CsoundLib</a> 5.x or later (framework and it's SupportLibs package)
+</li>
+<li><a href="#jack">JackOSX</a> 0.76 or later
+</li>
+</ul>
+
+<p>
+You should install JackOSX <b>after</b> Csounds SupportLibs package, since csound will
+overwrite your current jack library otherwise.
+</p>
+<p>
+Note that X11 is no longer needed.
+</p>
+<h3>Running</h3>
+<p>
+Start <a href="#jack">Jack</a> (through JackPilot) and then AlgoScore.
+</p>
+<p>
+The first time you start AlgoScore, it will notify you that a folder for custom userdata
+was not found and offer you to create one. The default location for this is
+<code>algoscore_data</code> under your home folder.
+</p>
+<a id="toc9" name="toc9"></a>
+<h1>Getting started</h1>
+<p>
+<b>TODO</b> Simple "hello world" tutorial. Pointers to examples in appendix?
+</p>
+<p>
+You might want to take a look at <a href="#using">Using AlgoScore</a>.
+Also take a look at the <a href="#examples">Examples</a>.
+</p>
+<a id="using" name="using"></a>
+<h1>Using AlgoScore</h1>
+<p>
+This section gives a detailed view of the user interface and the most important
+actions, like creating and connecting objects and editing their properties.
+</p>
+<a id="toc11" name="toc11"></a>
+<h2>Score window</h2>
+<p>
+<img align="bottom" src="score_window.png" border="0" alt=""/>
+</p>
+<p>
+This is the main AlgoScore window.
+The white area with the timeline and grids is the (now empty) graphical score.
+</p>
+<p>
+Many actions work by the concept of <i>soft selection</i>, this means that an
+action is initiated by pressing a key or clicking a mousebutton while pointing
+the mousecursor over the object that should be affected.
+</p>
+<p>
+At the top of the window is the menu where various actions can be performed,
+like opening and saving projects, exporting busses to audio, printing to PDF,
+etc...
+</p>
+<p>
+At the bottom of the window is the toolbar. It has buttons to do various actions
+(some of which is also available in the menus), a time display of the current
+play position, the tool-mode display (here <b>object</b>) and the zoom-control.
+Holding the mouse cursor over the buttons shows a tooltip with a description of
+what that button does.
+</p>
+<a id="toc12" name="toc12"></a>
+<h2>Console</h2>
+<p>
+<img align="bottom" src="console.png" border="0" alt=""/>
+</p>
+<p>
+This is the console, available on the <code>Windows-&gt;Console</code> menu.
+</p>
+<p>
+It has a text area that display information and error
+messages, and a command line where one has access to the built-in nasal
+interpreter. This can be used for scripted access to the score and
+objects, evaluating nasal expressions, or running external nasal scripts.
+</p>
+<a id="toc13" name="toc13"></a>
+<h2>Creating objects</h2>
+<p>
+<img align="bottom" src="create_object.png" border="0" alt=""/>
+</p>
+<p>
+It is important to understand the concept of classes and objects.
+Objects are created from object templates, called <i>classes</i>. A class defines
+<i>a kind</i> of object (like a rectangle, a circle, etc...),
+and an object is an instance of its class (<i>that</i> rectangle, <i>that</i> circle,
+etc...).
+</p>
+<p>
+To create an object, right-click on the score area or press <span class="key">n</span>. The above
+window will show up, displaying the list of available classes to the left
+and the currently selected class description to the right.
+Double-click on the class to create an object of that class.
+</p>
+<p>
+The objects can be moved around by dragging them with <span class="key">button1</span> (the left
+mouse button).
+Hold <span class="key">shift</span> while dragging to move in vertical direction only, <span class="key">ctrl</span> for
+horizontal direction only.
+</p>
+<p>
+To copy an object, press <span class="key">c</span> to enter <i>copy mode</i> and then drag the object.
+</p>
+<p>
+To delete an object, press <span class="key">delete</span> or <span class="key">backspace</span> while dragging the object.
+</p>
+<a id="props" name="props"></a>
+<h2>Properties</h2>
+<p>
+<img align="bottom" src="obj_propbox.png" border="0" alt=""/>
+</p>
+<p>
+Pressing <span class="key">p</span> while holding the mouse cursor over an object brings up the
+properties window for that object, where you can inspect and edit the
+properties of the object.
+</p>
+<p>
+Typical properties are start time, length, vertical position, but each class
+defines their own available properties. Some classes uses properties for
+user-data, for example a vector of numbers to describe a curve.
+</p>
+<p>
+Pressing <span class="key">p</span> over an empty score area brings up the properties for the score.
+</p>
+<a id="toc15" name="toc15"></a>
+<h2>Connecting objects</h2>
+<p>
+To connect two objects, press <span class="key">.</span> or right-click on the source-object.
+This brings up a menu of available outputs (1), choose the output and then click
+on the target-object (2), this brings up a menu of available inputs (3),
+choose the input. Done! (4)
+</p>
+<p>
+ (1):<img align="bottom" src="connect_1.png" border="0" alt=""/> (2):<img align="bottom" src="connect_2.png" border="0" alt=""/> (3):<img align="bottom" src="connect_3.png" border="0" alt=""/> (4):<img align="bottom" src="connect_4.png" border="0" alt=""/> 
+</p>
+<p>
+The connections can be moved by dragging them with the left mouse button.
+Note that <b>the graphical placement of connections has no meaning</b> other than
+visually. It's the position of the objects themselves that has meaning.
+</p>
+<p>
+Connections also has properties, these are accessed by pressing <span class="key">p</span> over a
+connection.
+</p>
+<h3>Transfer functions</h3>
+<p>
+Each connection has a <code>transfunc</code> property that can be used to process
+values through a Nasal expression. The variable <code>x</code> in the expression holds
+the original value.
+</p>
+<p>
+For example, to clip the value to -1 and +1: <code>math.clip(x, -1, 1)</code>.
+Or to transpose a note event before going to a MIDI bus: <code>[x[0]+7,x[1],x[2]]</code>.
+</p>
+<p>
+Note that you can have multiple connections from the same outlet, with different
+transfer functions, going to different destinations. One might for example
+extract only the velocity element from a note event and scale it to 0-1 and
+send it to another object: <code>x[1]/127</code>
+</p>
+<p>
+There are also object classes with a <code>transfunc</code> property, like all classes
+based on ASPlotObj. (linseg, jitter, sine, etc...)
+</p>
+<a id="toc16" name="toc16"></a>
+<h2>Alignments and Links</h2>
+<p>
+An object can be aligned to another object according to the objects
+alignmentpoints. This is often only the start and end of an object, but some
+objects has more than these two alignmentpoints.
+</p>
+<p>
+Alignment can be done as a single action, or as a permanent link. 
+Links are visualized as dotted vertical lines between objects. Linked objects
+will follow each other in the time-direction when one of them is moved.
+</p>
+<p>
+Pressing <span class="key">a</span> enters <i>align mode</i>, all objects will then show their
+alignmentpoints visually.
+</p>
+<p>
+Drag with <span class="key">button1</span> from an alignmentpoint in one object to one in another
+object, this will move the first object so that the alignmentpoints occur at the
+same time. Hold <span class="key">alt</span> to resize the first object so that it ends at the
+alignment.
+</p>
+<p>
+Drag with <span class="key">button3</span> to align and also create a permanent link between the
+objects. <span class="key">alt</span> works with links too, for resizing.
+</p>
+<p>
+Hold <span class="key">shift</span> and drag with any button to remove a link between objects.
+</p>
+<p>
+Hold <span class="key">control</span> and drag to only create a link without aligning first.
+</p>
+<a id="toc17" name="toc17"></a>
+<h2>Edit mode</h2>
+<p>
+Double-clicking or pressing <span class="key">e</span> on an object in <i>object mode</i> tells the object to initiate user
+editing. Some objects will show some special editing window, while some enters
+interactive editing mode where they will respond to key and mouse events in the
+score. If the object does not support any editing, nothing will happen. (This
+usally means that user-input is done through object <a href="#props">properties</a> instead).
+</p>
+<p>
+If the object uses a special editing window (for example <code>datagen</code>, <code>code</code>
+and <code>comment</code> objects), the tool mode will go back to <i>object mode</i> directly
+after the editing window has been presented.
+</p>
+<p>
+If the object supports in-score interactive editing, the object will show a
+thicker outline in a different color to indicate that it's in edit mode.
+Clicking on another editable object changes edit mode to that object, and
+pressing <span class="key">escape</span> or clicking on the score background exits edit mode.
+All other events on the object is handled by the object.
+</p>
+<a id="prefs" name="prefs"></a>
+<h2>Preferences</h2>
+<p>
+<img align="bottom" src="preferences.png" border="0" alt=""/>
+</p>
+<p>
+This is the main preferences, accessed at <code>File-&gt;Preferences</code> on the menu.
+They are saved to <code>.algoscorerc</code> in your home folder.
+</p>
+<p>
+<b>TODO:</b> Go through each option...
+</p>
+<a id="toc19" name="toc19"></a>
+<h2>Printing</h2>
+<p>
+<img align="bottom" src="printbox.png" border="0" alt=""/>
+</p>
+<p>
+<code>File-&gt;Print to file</code> on the menu brings up the print to file dialog. AlgoScore can
+export to PDF, PostScript or SVG which can then be published on the web or printed to
+paper with another application. Title, subtitle and composer can be set with the score
+properties.
+</p>
+<a id="toc20" name="toc20"></a>
+<h2>Exporting</h2>
+<p>
+<img align="bottom" src="export_audio.png" border="0" alt=""/>
+</p>
+<p>
+To export a bus to an audiofile or midifile, choose <code>File-&gt;export bus</code> on the menu.
+You can then choose the wanted format, encoding and filename.
+</p>
+<a id="toc21" name="toc21"></a>
+<h2>Key and mouse bindings</h2>
+<p>
+This section describes the key and mouse actions available in the score window.
+</p>
+<p>
+In this text, <span class="key">button1</span> refers to the left, <span class="key">button2</span> to the middle
+and <span class="key">button3</span> to the right mouse button.
+</p>
+<p>
+On OS X, <span class="key">command-button1</span> is the same as <span class="key">button3</span> (right-click).
+</p>
+<h3>Tool modes</h3>
+<p>
+The current tool mode is shown in the status bar.
+Change tool by pressing the corresponding key:
+</p>
+<table>
+<tr>
+<td><span class="key">o</span></td>
+<td>object mode</td>
+</tr>
+<tr>
+<td><span class="key">a</span></td>
+<td>align mode</td>
+</tr>
+<tr>
+<td><span class="key">c</span></td>
+<td>copy mode</td>
+</tr>
+<tr>
+<td><span class="key">i</span></td>
+<td>insert mode</td>
+</tr>
+</table>
+
+<p>
+<i>Object mode</i> is the default one and other modes will go back to this after
+any action is done.
+</p>
+<h3>All modes</h3>
+<table>
+<tr>
+<td><span class="key">home</span></td>
+<td>scroll to start</td>
+</tr>
+<tr>
+<td><span class="key">1</span></td>
+<td>fit all</td>
+</tr>
+<tr>
+<td><span class="key">+</span></td>
+<td>zoom in</td>
+</tr>
+<tr>
+<td><span class="key">-</span></td>
+<td>zoom out</td>
+</tr>
+<tr>
+<td><span class="key">L</span></td>
+<td>toggle object labels</td>
+</tr>
+<tr>
+<td><span class="key">O</span></td>
+<td>toggle object outlines</td>
+</tr>
+<tr>
+<td><span class="key">U</span></td>
+<td>toggle delay update</td>
+</tr>
+<tr>
+<td><span class="key">E</span></td>
+<td>set endmark to current pointer position</td>
+</tr>
+<tr>
+<td><span class="key">b</span></td>
+<td>add new page break at pointer position</td>
+</tr>
+<tr>
+<td><span class="key">0</span></td>
+<td>locate play cursor to start of score</td>
+</tr>
+<tr>
+<td><span class="key">enter</span></td>
+<td>locate play cursor to current pointer position</td>
+</tr>
+<tr>
+<td><span class="key">space</span></td>
+<td>toggle play/stop</td>
+</tr>
+<tr>
+<td><span class="key">button2</span> drag</td>
+<td>pan view</td>
+</tr>
+<tr>
+<td><span class="key">delete</span> or <span class="key">backspace</span></td>
+<td>delete object, connection or marker while moving it.</td>
+</tr>
+</table>
+
+<p>
+Additionally these actions are available on menu's:
+</p>
+<table>
+<tr>
+<td><span class="key">ctrl-u</span></td>
+<td>perform all pending updates</td>
+</tr>
+<tr>
+<td><span class="key">ctrl-k</span></td>
+<td>stop background updates</td>
+</tr>
+<tr>
+<td><span class="key">alt-e</span></td>
+<td>set endmark to end of last object</td>
+</tr>
+<tr>
+<td><span class="key">ctrl-o</span></td>
+<td>open file</td>
+</tr>
+<tr>
+<td><span class="key">ctrl-s</span></td>
+<td>save file</td>
+</tr>
+<tr>
+<td><span class="key">ctrl-n</span></td>
+<td>create new project</td>
+</tr>
+<tr>
+<td><span class="key">ctrl-p</span></td>
+<td>print score to file</td>
+</tr>
+<tr>
+<td><span class="key">ctrl-q</span></td>
+<td>quit</td>
+</tr>
+<tr>
+<td><span class="key">alt-l</span></td>
+<td>bring up console log window</td>
+</tr>
+</table>
+
+<h3>Object mode</h3>
+<table>
+<tr>
+<td><span class="key">button1</span> drag</td>
+<td>move objects</td>
+</tr>
+<tr>
+<td><span class="key">shift-button1</span> drag</td>
+<td>move in vertical direction only</td>
+</tr>
+<tr>
+<td><span class="key">ctrl-button1</span> drag</td>
+<td>move in horizontal direction only</td>
+</tr>
+<tr>
+<td><span class="key">alt-button1</span> drag</td>
+<td>resize object</td>
+</tr>
+<tr>
+<td><span class="key">n</span> or <span class="key">button3</span></td>
+<td>on score background to create a new object</td>
+</tr>
+<tr>
+<td><span class="key">.</span> or <span class="key">button3</span></td>
+<td>on object to make connection</td>
+</tr>
+<tr>
+<td><span class="key">p</span> or <span class="key">ctrl-double-click</span></td>
+<td>on object, connection, or score background to show and edit properties</td>
+</tr>
+<tr>
+<td><span class="key">u</span></td>
+<td>on object to update only that object</td>
+</tr>
+<tr>
+<td><span class="key">e</span> or <span class="key">double-click</span></td>
+<td>on object to make it editable. See <i>edit mode</i> for details.</td>
+</tr>
+<tr>
+<td><span class="key">I</span></td>
+<td>on object to inspect it: shows detailed low-level information.</td>
+</tr>
+</table>
+
+<h3>Align mode</h3>
+<table>
+<tr>
+<td><span class="key">button1</span> drag</td>
+<td>between alignmentpoints (from one object to another) to align first object.</td>
+</tr>
+<tr>
+<td><span class="key">alt-button1</span> drag</td>
+<td>resize the first object so that it ends at the alignment.</td>
+</tr>
+<tr>
+<td><span class="key">button3</span> drag</td>
+<td>align and create a permanent link.</td>
+</tr>
+<tr>
+<td><span class="key">alt-button3</span> drag</td>
+<td>resize and create a permanent link.</td>
+</tr>
+<tr>
+<td><span class="key">shift-button1</span> drag</td>
+<td>remove a permanent link between objects.</td>
+</tr>
+<tr>
+<td><span class="key">ctrl-button1</span> drag</td>
+<td>only create a link without aligning first.</td>
+</tr>
+</table>
+
+<h3>Copy mode</h3>
+<p>
+Moving objects as in <i>object mode</i>, but creates a copy of the object.
+</p>
+<p>
+Drag with <span class="key">button3</span> to create a ghost copy: an object that is an alias for the
+source object and will have its own position and length, but
+inherit all other properties from the source object.
+[<b>This feature is still experimental</b>]
+</p>
+<h3>Edit mode</h3>
+<p>
+Objects using a special editing window will present it and then go back
+to <i>object mode</i>.
+</p>
+<p>
+Objects supporting in-score interactive editing shows a thicker outline in a
+different color.
+</p>
+<p>
+Click on another editable object to change edit mode to that object.
+</p>
+<p>
+Press <span class="key">escape</span> or click the score background to exit edit mode.
+</p>
+<p>
+All other events on the object is handled by the object.
+</p>
+<h3>Insert mode</h3>
+<p>
+Drag with <span class="key">button1</span> to move all objects which are to the right of the mouse
+cursor in the time-direction.
+</p>
+<a id="toc22" name="toc22"></a>
+<h1>Getting output</h1>
+<p>
+This section gives an overview of the ways of getting output from AlgoScore.
+This is done through special <i>output busses</i>.
+There is currently a Csound bus, a control signal bus,
+an OpenSoundControl bus, and a MIDI bus class available.
+</p>
+<a id="toc23" name="toc23"></a>
+<h2>Csound bus</h2>
+<p>
+AlgoScore can use <a href="#csound">Csound</a> to produce sound which can be played back through
+<a href="#jack">JACK</a> or
+exported to an audiofile. It interfaces to Csound through objects of the
+<a href="#csound_bus_class">csound_bus</a> class. Each <code>csound_bus</code> object is an instance of Csound.
+</p>
+<h3>Orchestra</h3>
+<p>
+After you created a <code>csound_bus</code> you should give it an orchestra file. This is done by
+setting the <code>orc_file</code> property on the bus. You need to use an external editor to create
+and edit the orchestra file. The csound orchestra syntax is beyond the scope of this
+manual, see <a href="http://www.csounds.com">http://www.csounds.com</a> for tutorials and more information on csound.
+</p>
+<p>
+The
+orchestra file is searched in the current folder or the folder where the project is saved.
+It's recommended that you start by saving the project in a folder so you know where to
+place the orchestra file.
+</p>
+<p>
+If you edit the orchestra file you need to press <span class="key">u</span> on the csound bus to make it reload
+the orchestra, since AlgoScore won't know about things you do with an external text
+editor.
+</p>
+<p>
+You can set your favorite text editor in the <a href="#prefs">Preferences</a>, pressing <span class="key">e</span> on the csound
+bus will then bring up the orchestra file of that bus in the editor.
+</p>
+<h3>Inlets</h3>
+<p>
+The csound bus has inlets for events and ftabs. Also all software channels
+exported from the orchestra by the <code>chnexport</code> opcode will show up here,
+allowing k-rate control of global variables in the orchestra.
+</p>
+<p>
+You can use <code>cs_instr</code> or <code>cs_instr_graph</code> objects to send single
+instrument events, or use nasal code in <code>datagen</code> objects to generate
+them algorithmically.
+</p>
+<p>
+The event data expected on the <code>events</code> input should be in the form <code>[p1, p3, ...]</code>.
+Note that p2 (start time) is skipped since it's already in the AlgoScore event. The
+full AlgoScore event format would be <code>[p2, [p1, p3, ...] ]</code>.
+</p>
+<h3>Jack ports</h3>
+<p>
+Each csound bus will create a corresponding JACK output port for each channel (as defined
+by <code>nchnls</code> in the orchestra). AlgoScore will try to autoconnect these ports to the
+default soundcard of the system. This might not work on OS X, then you need to manually
+connect them in the JACK router.
+</p>
+<p>
+Currently, the sample rate of csound (<code>sr</code> in the orchestra) <b>must</b> be the same as
+JACK!
+</p>
+<h3>Rendering, playback and export</h3>
+<p>
+Each change that affects the csound bus will make it start rendering audio, this is
+visualized by a red transparent bar. You can start playing the audio before it has
+finished, but if the play position reaches the non-rendered area of the bus, playback will
+be silenced.
+</p>
+<p>
+With a complicated orchestra and many events, rendering can be slow. To avoid that each
+little change in the score triggers the rendering, you can set the <code>delay_update</code>
+property of the csound bus to 1. You can now make multiple changes, and press <span class="key">Ctrl-U</span> to update all
+objects that are waiting for an update, or <span class="key">u</span> on a single object to update only that
+one. All objects in need of update will be seen with the transparent red bar.
+</p>
+<p>
+To export a csound bus to an audiofile, choose <code>File-&gt;export bus</code> on the menu.
+</p>
+<a id="toc24" name="toc24"></a>
+<h2>Control signal bus</h2>
+<p>
+The <code>signal_bus</code> samples the incoming numerical values at a given division
+of the JACK sample rate, the divisor is set by the <code>sr_div</code> property. The data is
+then upsampled and sent as an audio stream on a JACK signal port.
+</p>
+<p>
+Any application or DSP environment that can take input from JACK can thus be
+controlled by AlgoScore, for example PureData, SuperCollider, ChucK, Max/MSP.
+</p>
+<p>
+A signal bus can also be exported as an audiofile, including raw (headerless)
+float data which might be suitable for importing in other applications.
+</p>
+<a id="toc25" name="toc25"></a>
+<h2>OSC bus</h2>
+<p>
+The <code>osc_bus</code> class creates OpenSoundControl bus objects. Each OSC bus has
+an <code>osc_address</code> property that takes an URL of where to send the messages,
+default is 'osc.udp://localhost:7770'.
+</p>
+<p>
+The <code>controllers</code> property has a table of inlets and their OSC path and
+typetag string. Example:
+</p>
+<pre>
+{ note: ['/foo/note', 'iff'],
+  foo:  ['/foo/bar',  'f'  ] }
+</pre>
+<p></p>
+<p>
+If any interpolating output (for example a linseg or jitter object) is connected
+to the OSC bus it samples them at the interval specified in the <code>resolution</code>
+property of the bus.
+</p>
+<p>
+See the <a href="#osc_bus_class">description of osc_bus</a> for details.
+</p>
+<a id="toc26" name="toc26"></a>
+<h2>MIDI bus</h2>
+<p>
+The <code>midi_bus</code> class creates MIDI bus objects. Each MIDI bus creates a
+corresponding JACK midi port (Needs recent version of JACK).
+</p>
+<p>
+The JACK midi ports can then be connected to other software or external hardware
+for control of synthesizers or other devices.
+</p>
+<p>
+Each MIDI bus has properties for channel and JACK port name, and a list of
+controllers. It supports 7 and 14 bit controllers, pitchbend and note events.
+</p>
+<p>
+See the <a href="#midi_bus_class">description of midi_bus</a> for details.
+</p>
+<a id="toc27" name="toc27"></a>
+<h1>Included classes</h1>
+<a id="code_class" name="code_class"></a>
+<h2>code</h2>
+<p>
+<b>Compile and evaluate nasal code.</b><BR>
+<BR>
+<b>Properties:</b><BR>
+</p>
+<table>
+<tr>
+<td><code>eval_once</code></td>
+<td>- if 0, the code will be evaluated each time a receieving object asks for a value.<BR></td>
+</tr>
+</table>
+
+<p>
+<b>Outlets:</b><BR>
+</p>
+<table>
+<tr>
+<td><code>value</code></td>
+<td>- outputs the returned value from the code.<BR></td>
+</tr>
+<tr>
+<td><code>func</code></td>
+<td>- outputs the compiled function.<BR></td>
+</tr>
+</table>
+
+<p>
+<BR>
+The code runs with the following variables available:<BR>
+</p>
+<table>
+<tr>
+<td><code>math</code></td>
+<td>- the math library (sin, pow, mod, etc...)<BR></td>
+</tr>
+<tr>
+<td><code>G_set(sym,val)</code></td>
+<td>- set global variable.<BR></td>
+</tr>
+<tr>
+<td><code>G_get(sym)</code></td>
+<td>- get global variable.</td>
+</tr>
+</table>
+
+<a id="comment_class" name="comment_class"></a>
+<h2>comment</h2>
+<p>
+<b>Place a text comment in the score.</b><BR>
+<BR>
+If <code>marker in score</code> property is set, a vertical gridline is drawn at the left edge of the object.
+</p>
+<a id="comparator_class" name="comparator_class"></a>
+<h2>comparator</h2>
+<p>
+<b>Compare two numerical inputs.</b><BR>
+<BR>
+<code>min</code> and <code>max</code> properties sets the output value for when the <code>in</code> input is below or above the <code>tresh</code> input.<BR>
+<BR>
+<code>resolution</code> property sets sample interval in seconds.
+</p>
+<a id="cs_ftab_class" name="cs_ftab_class"></a>
+<h2>cs_ftab</h2>
+<p>
+<b>Single event CSound function table generator/visualizer.</b><BR>
+<BR>
+To be used with the csound objects <code>ftable</code> input.<BR>
+The start time of this object is ignored.<BR>
+<code>parms</code> is a vector of f-statement parameters, like <code>[1,0,1024,10,1]</code> for a single sinewave cycle in ftab #1.<BR>
+<BR>
+If set to a single element vector, it does not send any event but only visualizes the specified function table.
+</p>
+<a id="cs_instr_class" name="cs_instr_class"></a>
+<h2>cs_instr</h2>
+<p>
+<b>Single CSound instrument event.</b><BR>
+<BR>
+p2 (time) and p3 (duration) is taken from the position and length of the object.<BR>
+<BR>
+<code>instr</code> property sets the instrument number.<BR>
+<BR>
+<code>parms</code> property is a list of instrument parameters, starting with p4.<BR>
+If <code>in(X)</code> is used instead of a numeric parameter in this list, an inlet named X will be created and used to initialize that parameter.<BR>
+<BR>
+Example: <code>[100, in('A'), 1]</code> will set p4 to 100, p5 to the current value at the inlet A and p6 to 1.
+</p>
+<a id="cs_instr_graph_class" name="cs_instr_graph_class"></a>
+<h2>cs_instr_graph</h2>
+<p>
+<b>Single CSound instrument event.</b><BR>
+<BR>
+p2 (time) and p3 (duration) is taken from the position and length of the object.<BR>
+<BR>
+<code>instr</code> property sets the instrument number.<BR>
+<BR>
+<code>parms</code> property is a list of instrument parameters, starting with p4.<BR>
+If <code>in(X)</code> is used instead of a numeric parameter in this list, an inlet named X will be created and used to initialize that parameter.<BR>
+<BR>
+Example: <code>[100, in('A'), 1]</code> will set p4 to 100, p5 to the current value at the inlet A and p6 to 1.<BR>
+<BR>
+The <code>graphs</code> property is a hash like this: <code>{amp:{fill:1, lw:1, max:1}, foo:{fill:0, lw:2, max:100}}</code><BR>
+The keys specifies what outvalue-channels to plot, <code>fill</code> tells if the graph should be filled or not, <code>lw</code> is linewidth and <code>max</code> the maximum value.<BR>
+<BR>
+The values should be sent from the orchestra with code like this:<BR>
+<BR>
+  <code>ktrig metro 50</code><BR>
+  <code>if ktrig == 1 then</code><BR>
+    <code>outvalue "tag", p1 ; needed to identify the event</code><BR>
+    <code>outvalue "amp", k1</code><BR>
+    <code>outvalue "foo", k2</code><BR>
+  <code>endif</code><BR>
+</p>
+<a id="csound_bus_class" name="csound_bus_class"></a>
+<h2>csound_bus</h2>
+<p>
+<b>CSound output bus.</b><BR>
+<BR>
+<code>orc_file</code> property sets the orchestra file to use.<BR>
+<BR>
+<code>events</code> input takes instrument events as <code>[p1,p3,...]</code> and gives them to csound with p2 set to the time of the incomming event.<BR>
+<BR>
+<code>ftable</code> input takes single events with GEN parameters as <code>[ftab_num, time, size, gen_num, gen_args...]</code><BR>
+<BR>
+Any software channels defined in the orchestra will show up in the connection list.
+</p>
+<a id="datagen_class" name="datagen_class"></a>
+<h2>datagen</h2>
+<p>
+<b>Generate data or events with nasal code.</b><BR>
+<BR>
+The code runs with the following variables available:<BR>
+</p>
+<table>
+<tr>
+<td><code>length</code></td>
+<td>- the length of the object. (read-only)<BR></td>
+</tr>
+<tr>
+<td><code>in</code></td>
+<td>- a table of functions f(t) to get value from input at time t, named after the inputs specified in the <code>aux_inputs</code> property. example: <code>x = in.A(t);</code><BR></td>
+</tr>
+<tr>
+<td><code>out.resolution</code></td>
+<td>- sample interval, or 0 for event-data.<BR></td>
+</tr>
+<tr>
+<td><code>out.interpolate</code></td>
+<td>- 1 to interpolate between values.<BR></td>
+</tr>
+<tr>
+<td><code>out.data</code></td>
+<td>- the output data, initialized to []<BR></td>
+</tr>
+<tr>
+<td><code>math</code></td>
+<td>- the math library (sin, pow, mod, etc...)<BR></td>
+</tr>
+<tr>
+<td><code>inlets</code></td>
+<td>- direct access to inlets, for use of Inlet.get_connections() and such.<BR></td>
+</tr>
+<tr>
+<td><code>G_set(sym,val)</code></td>
+<td>- set global variable.<BR></td>
+</tr>
+<tr>
+<td><code>G_get(sym)</code></td>
+<td>- get global variable.<BR></td>
+</tr>
+</table>
+
+<p>
+<BR>
+Multiple outlets may be specified in the <code>outlets</code> property. They will be available just like 'out' above but named accordingly.
+</p>
+<a id="evgraph_class" name="evgraph_class"></a>
+<h2>evgraph</h2>
+<p>
+<b>Plot discrete events.</b><BR>
+<BR>
+<code>events</code> input takes events in the format <code>[val1, ...]</code><BR>
+<BR>
+<b>Properties:</b><BR>
+</p>
+<table>
+<tr>
+<td><code>y_parm</code></td>
+<td>- what element of the event should describe the vertical position of the event.<BR></td>
+</tr>
+<tr>
+<td><code>y2_parm</code></td>
+<td>- what element of the event should describe the vertical end-position of the event.<BR></td>
+</tr>
+<tr>
+<td><code>dur_parm</code></td>
+<td>- what element should describe the length of the event.<BR></td>
+</tr>
+<tr>
+<td><code>black_parm</code></td>
+<td>- what element should describe the opacity of the event.<BR></td>
+</tr>
+<tr>
+<td><code>size_parm</code></td>
+<td>- what element should describe the size of the onset marker. Use <code>size_scale</code> to scale it.<BR></td>
+</tr>
+<tr>
+<td><code>grid</code></td>
+<td>- y-space division.</td>
+</tr>
+</table>
+
+<a id="funcbus_class" name="funcbus_class"></a>
+<h2>funcbus</h2>
+<p>
+<b>Process inputs through nasal code.</b><BR>
+<BR>
+The code runs with the following variables available:<BR>
+</p>
+<table>
+<tr>
+<td><code>in</code></td>
+<td>- a table of functions f(t) to get value from input at time t, named after the inputs specified in the <code>aux_inputs</code> property. example: <code>return x * in.A(t);</code><BR></td>
+</tr>
+<tr>
+<td><code>t</code></td>
+<td>- time of the value asked for by the receieving object.<BR></td>
+</tr>
+<tr>
+<td><code>ev</code></td>
+<td>- the value of the 'event' inlet at time t.<BR></td>
+</tr>
+<tr>
+<td><code>x</code></td>
+<td>- ramp from 0.0 to 1.0 along the length of the object.<BR></td>
+</tr>
+<tr>
+<td><code>outlet</code></td>
+<td>- the name of the outlet asked for by the receieving object. The available outlets are specified in the <code>outlets</code> property.<BR></td>
+</tr>
+<tr>
+<td><code>length</code></td>
+<td>- the length of the object.<BR></td>
+</tr>
+<tr>
+<td><code>math</code></td>
+<td>- the math library (sin, pow, mod, etc...)<BR></td>
+</tr>
+<tr>
+<td><code>init</code></td>
+<td>- 1 at first eval after update.<BR></td>
+</tr>
+<tr>
+<td><code>G_set(sym,val)</code></td>
+<td>- set global variable.<BR></td>
+</tr>
+<tr>
+<td><code>G_get(sym)</code></td>
+<td>- get global variable.<BR></td>
+</tr>
+</table>
+
+<p>
+<BR>
+If a destination object asks for an event by index, t will be set to the corresponding event of the 'event' inlet, both in the <code>t</code> variable and in the returned event. The 'ev' variable will then hold the actual value of the event. This can be used to synthesize events by combining multiple sources or expressions.
+</p>
+<a id="graph_class" name="graph_class"></a>
+<h2>graph</h2>
+<p>
+Plot incomming numerical data.
+</p>
+<a id="jitter_class" name="jitter_class"></a>
+<h2>jitter</h2>
+<p>
+<b>Random line-curve.</b><BR>
+<BR>
+<code>min duration</code> and <code>max duration</code> sets default min and max duration in seconds. Can also be controlled with <code>mindur</code> and <code>maxdur</code> inlets.<BR>
+<code>time_randomizer</code> and <code>value_randomizer</code> sets the code used to get random numbers. aux inputs are available as <code>in</code>, current time as <code>t</code> and last value as <code>last</code>.
+</p>
+<a id="linseg_class" name="linseg_class"></a>
+<h2>linseg</h2>
+<p>
+<b>User defined break-point curve.</b><BR>
+<BR>
+<code>shape data</code> property is in the format <code>[val1, time1, val2, time2, val3, ...]</code><BR>
+if <code>proportional</code> is zero, times are in seconds, otherwise relative each other and fitted into the object length.
+</p>
+<a id="masklinseg_class" name="masklinseg_class"></a>
+<h2>masklinseg</h2>
+<p>
+Like <code>linseg</code> but with min/max curves.
+</p>
+<a id="maskshape_class" name="maskshape_class"></a>
+<h2>maskshape</h2>
+<p>
+Like <code>shape</code> but with min/max curves.
+</p>
+<a id="midi_bus_class" name="midi_bus_class"></a>
+<h2>midi_bus</h2>
+<p>
+<b>Output MIDI to JACK or midifile.</b><BR>
+<BR>
+<b>Properties:</b><BR>
+</p>
+<table>
+<tr>
+<td><code>port_id</code></td>
+<td>- name of the JACK midiport.<BR></td>
+</tr>
+<tr>
+<td><code>channel</code></td>
+<td>- MIDI channel.<BR></td>
+</tr>
+<tr>
+<td><code>controllers</code></td>
+<td>- table of CC names and their number, like <code>{mod:1,vol:7}</code>. Add 1000 to the number to make it send 14 bit controllers instead of 7 bit.<BR></td>
+</tr>
+<tr>
+<td><code>resolution</code></td>
+<td>- resolution of interpolated inputs.<BR></td>
+</tr>
+</table>
+
+<p>
+<BR>
+<b>Inputs:</b><BR>
+</p>
+<table>
+<tr>
+<td><code>note</code></td>
+<td>- note events in the format <code>[pitch, velocity]</code> or <code>[pitch, velocity, duration]</code>.<BR></td>
+</tr>
+<tr>
+<td><code>pitch</code></td>
+<td>- numerical input in the range -1.0 to +1.0 for pitchwheel events.<BR></td>
+</tr>
+<tr>
+<td><code>raw</code></td>
+<td>- events of raw midi bytes, like <code>[0x90, 60, 100]</code>.<BR></td>
+</tr>
+</table>
+
+<p>
+All CC's defined in <code>controllers</code> shows up as inputs, and takes numerical data in the range 0.0 to 1.0.<BR>
+</p>
+<a id="morph_class" name="morph_class"></a>
+<h2>morph</h2>
+<p>
+<b>Morph between two inputs</b><BR>
+<BR>
+Vectors and hashes are handled recursively.<BR>
+Vectors must have the same structure.<BR>
+Any keys in one hash that are missing in the other are copied.<BR>
+If the type of A is not the same as B, the value of A will be returned.<BR>
+The <code>interpolator</code> property defines the function used for interpolating between numeric values.<BR>
+The code runs with the following variables set:<BR>
+</p>
+<table>
+<tr>
+<td><code>a</code></td>
+<td>- The value of input A.<BR></td>
+</tr>
+<tr>
+<td><code>b</code></td>
+<td>- The value of input B.<BR></td>
+</tr>
+<tr>
+<td><code>x</code></td>
+<td>- The value of input x if connected, else a ramp between 0.0 and 1.0 along the length of the object.<BR></td>
+</tr>
+</table>
+
+<a id="noise_class" name="noise_class"></a>
+<h2>noise</h2>
+<p>
+<b>Random LFO.</b><BR>
+<BR>
+<b>Inputs:</b><BR>
+</p>
+<table>
+<tr>
+<td><code>max</code></td>
+<td>- upper value limit.<BR></td>
+</tr>
+<tr>
+<td><code>min</code></td>
+<td>- lower value limit.<BR></td>
+</tr>
+</table>
+
+<p>
+<BR>
+<b>Properties:</b><BR>
+</p>
+<table>
+<tr>
+<td><code>seed</code></td>
+<td>- initial random seed.<BR></td>
+</tr>
+<tr>
+<td><code>randomizer</code></td>
+<td>- the code used to get random number. aux inputs are available as <code>in</code>, current time as <code>t</code> and last value as <code>last</code>.<BR></td>
+</tr>
+<tr>
+<td><code>out.resolution</code></td>
+<td>- rate in seconds.<BR></td>
+</tr>
+<tr>
+<td><code>out.interpolate</code></td>
+<td>- 0 for stepped values and 1 for interpolated lines between values</td>
+</tr>
+</table>
+
+<a id="osc_bus_class" name="osc_bus_class"></a>
+<h2>osc_bus</h2>
+<p>
+<b>Output OSC (OpenSoundControl) messages.</b><BR>
+<BR>
+<b>Properties:</b><BR>
+</p>
+<table>
+<tr>
+<td><code>osc_address</code></td>
+<td>- destination URL, like 'osc.udp://localhost:7770'<BR></td>
+</tr>
+<tr>
+<td><code>resolution</code></td>
+<td>- resolution of interpolated inputs.<BR></td>
+</tr>
+<tr>
+<td><code>controllers</code></td>
+<td>- table of inlet names and their path and typetag string, like <code>{freq:['/something/freq','f']}</code><BR></td>
+</tr>
+</table>
+
+<p>
+<BR>
+When the typetag string is a single letter, the inlet expects a single value, otherwise it expects a vector with corresponding types.<BR>
+<BR>
+<b>Type tags:</b><BR>
+</p>
+<table>
+<tr>
+<td>f</td>
+<td>- float<BR></td>
+</tr>
+<tr>
+<td>i</td>
+<td>- 32 bit integer<BR></td>
+</tr>
+<tr>
+<td>d</td>
+<td>- double<BR></td>
+</tr>
+<tr>
+<td>c</td>
+<td>- 8 bit integer<BR></td>
+</tr>
+<tr>
+<td>s</td>
+<td>- string<BR></td>
+</tr>
+<tr>
+<td>S</td>
+<td>- symbol<BR></td>
+</tr>
+<tr>
+<td>m</td>
+<td>- string of 4 midi bytes<BR></td>
+</tr>
+</table>
+
+<a id="recv_class" name="recv_class"></a>
+<h2>recv</h2>
+<p>
+Receive data from the Send object that are sending on the same symbol.
+</p>
+<a id="send_class" name="send_class"></a>
+<h2>send</h2>
+<p>
+Send data to all Recv objects that are listening on the same symbol.
+</p>
+<a id="shape_class" name="shape_class"></a>
+<h2>shape</h2>
+<p>
+<b>Simple ramps between values.</b><BR>
+<BR>
+<code>shape data</code> property sets the sequence of values, which are evenly spaced along the length of the object.
+</p>
+<a id="signal_bus_class" name="signal_bus_class"></a>
+<h2>signal_bus</h2>
+<p>
+<b>Send raw float values through a JACK signal port.</b><BR>
+<BR>
+The <code>sr_div</code> property sets the control rate as a division of the sample rate, as queried from the JACK server.
+</p>
+<a id="sine_class" name="sine_class"></a>
+<h2>sine</h2>
+<p>
+<b>Sinewave LFO.</b><BR>
+<BR>
+<b>Inputs:</b><BR>
+</p>
+<table>
+<tr>
+<td><code>freq</code></td>
+<td>- set frequency.<BR></td>
+</tr>
+<tr>
+<td><code>freq_mul</code></td>
+<td>- scale the frequency.<BR></td>
+</tr>
+<tr>
+<td><code>amp</code></td>
+<td>- scale the amplitude.<BR></td>
+</tr>
+</table>
+
+<p>
+<BR>
+<b>Properties:</b><BR>
+</p>
+<table>
+<tr>
+<td><code>out.freq</code></td>
+<td>- default frequency when <code>freq</code> input is not connected.<BR></td>
+</tr>
+<tr>
+<td><code>out.amp</code></td>
+<td>- the initial amplitude.<BR></td>
+</tr>
+<tr>
+<td><code>out.resolution</code></td>
+<td>- the sample interval in seconds.</td>
+</tr>
+</table>
+
+<a id="slider_class" name="slider_class"></a>
+<h2>slider</h2>
+<p>
+A simple graphical slider.
+</p>
+<a id="timegrid_class" name="timegrid_class"></a>
+<h2>timegrid</h2>
+<p>
+<b>Timegrid with alignmentpoints and controllable tempo.</b>
+</p>
+<a id="toc54" name="toc54"></a>
+<h1>Programming</h1>
+<p>
+This section will cover information for advanced usage of AlgoScore like internal
+workings, baseclass and library references, etc...
+</p>
+<a id="toc55" name="toc55"></a>
+<h2>Internals</h2>
+<p>
+<b>TODO</b> updating and dependency tree, redrawing, etc..
+</p>
+<a id="toc56" name="toc56"></a>
+<h2>Data formats and communication</h2>
+<h3>Events or samples</h3>
+<p>
+There are two ways data is stored in objects:
+</p>
+<dl>
+<dt>Samples</dt><dd>
+  An array of values where each element corresponds to a time increment (in seconds)
+  specified in <code>outlet.resolution</code>.
+</dd>
+<dt>Events</dt><dd>
+  A list of events in the format <code>[t,value]</code>. This mode is
+  indicated by setting <code>outlet.resolution</code> to zero.
+</dd>
+</dl>
+
+<p>
+The actual values can be of any type.
+</p>
+<p>
+A destination object can use <code>connection.get_resolution()</code> to get the value of <code>outlet.resolution</code>.
+</p>
+<h3>Value by time or index</h3>
+<p>
+There are two ways for an object to get data from another object. One is
+to get the current value at time <i>t</i>, the other is to get events by index <i>i</i>.
+</p>
+<p>
+The convenient way of getting value by time is by first creating a getter function for the specified inlet:
+</p>
+<pre>
+inlet = me.inlets["my_inlet"];
+getter_func = inlet.val_finder(default_value);
+</pre>
+<p>
+The value of <i>inlet</i> at time <i>t</i> can then be retreived
+by calling <code>getter_func(t)</code>. <i>t</i> is counted in seconds from the start of the destination object.
+What this does behind the scenes is to find the relevant connection at time <i>t</i>
+and then getting the value at time <i>t</i> from this connection by calling <code>connection.get_value(t)</code>.
+Overlapping source objects overrides previous ones.
+</p>
+<p>
+The way of getting events by index is by first getting a list of the connections of a specified inlet
+and then looping through them and getting each event:
+</p>
+<pre>
+inlet = me.inlets["my_inlet"];
+connections = inlet.get_connections();
+foreach(con; connections) {
+  for(i=0; i&lt;con.datasize; i+=1) {
+    ev=con.get_event(i);
+    ...
+  }
+}
+</pre>
+<p>
+Getting events by index means that it's possible to handle overlapping source objects and multiple events
+with the same onset time.
+</p>
+<p>
+<code>connection.get_value(t)</code> and <code>connection.get_event(i)</code> calls <code>source_obj.get_value(outlet,t)</code>
+and <code>source_obj.get_event(outlet,i)</code>. These methods can be overridden by subclasses, the default methods
+fetches data from the <code>outlet.data</code> vector.
+</p>
+<p>
+The <code>outlet.interpolate</code> flag indicates if the outlet contains data that is interpolatable,
+which means that a <code>get_value(t)</code> where t is between two events or samples will interpolate the returned value
+through <code>source_obj.interpolate(outlet,a,b,x)</code>. This flag is available through <code>connection.get_interpolate()</code>.
+</p>
+<p>
+The interpolate flag should be set for curve-like continous data, and unset for
+discrete events like csound or midi note events. Many objects look at this flag to determine if it should
+get event by index or value by time, for example the OSC bus.
+</p>
+<p>
+See documentation for <a href="#Inlet">Inlet</a> and <a href="#Connection">Connection</a> classes for more information.
+</p>
+<a id="custom" name="custom"></a>
+<h2>Customization</h2>
+<p>
+<b>TODO</b> user_data_dir for custom classes and libs, general guide-lines
+for writing your own classes, with pointers to the subsections below...
+</p>
+<a id="Score" name="Score"></a>
+<h2>Score class</h2>
+<p>
+The current score object is available as <code>score</code> in the console or
+<code>me.score</code> in classes.
+</p>
+<h3>Score.objects{}</h3>
+<p>
+A table of all objects in the score, indexed by numerical ID.
+</p>
+<h3>Score.new_obj_by_name(class_name)</h3>
+<p>
+Create object from class <code>class_name</code>.
+</p>
+<h3>Score.time2x(t)</h3>
+<p>
+Convert time in seconds to pixel position according to current zoom.
+</p>
+<h3>Score.x2time(x)</h3>
+<p>
+Convert pixel position to time in seconds according to current zoom.
+</p>
+<h3>Score.update_all(all=0, list=nil, force=0)</h3>
+<p>
+Update all objects.
+</p>
+<table>
+<tr>
+<td><code>all</code></td>
+<td>- all objects if 1, otherwise only pending updates.</td>
+</tr>
+<tr>
+<td><code>list</code></td>
+<td>- list of objects if not nil, otherwise all objects.</td>
+</tr>
+<tr>
+<td><code>force</code></td>
+<td>- also objects with <code>delay_update</code> set.</td>
+</tr>
+</table>
+
+<h3>Score.get_object_tree(list=nil)</h3>
+<p>
+Get a list of all objects (or the ones in <code>list</code>)
+sorted according to their dependencies.
+</p>
+<h3>Score.dump_objects()</h3>
+<p>
+Generate a textual string that will create the current
+score with all objects if compiled and run as nasal code.
+</p>
+<h3>Score.save_to_file(filename)</h3>
+<p>
+Save the current score to file.
+</p>
+<h3>Score.load_from_file(filename)</h3>
+<p>
+Load a score from file.
+</p>
+<h3>Score.multi_copy(id, n, dt=nil, ghost=0)</h3>
+<p>
+Make multiple copies of an object.
+</p>
+<table>
+<tr>
+<td><code>id</code></td>
+<td>- the object ID.</td>
+</tr>
+<tr>
+<td><code>n</code></td>
+<td>- numer of copies.</td>
+</tr>
+<tr>
+<td><code>dt</code></td>
+<td>- amount of time each copy should be offset, defaults to objects length.</td>
+</tr>
+<tr>
+<td><code>ghost</code></td>
+<td>- if 1, create ghost copies instead of real copies.</td>
+</tr>
+</table>
+
+<h3>Score.align_ghosts()</h3>
+<p>
+Vertically align all ghost copies with their parents.
+</p>
+<h3>Score.match_prop(prop, val)</h3>
+<p>
+Return a list of IDs of all objects where property <code>prop</code> matches <code>val</code>.
+</p>
+<h3>Score.many_set_prop(ids, prop, val)</h3>
+<p>
+Set property on multiple objects at once.
+</p>
+<table>
+<tr>
+<td><code>ids</code></td>
+<td>- a list of object IDs.</td>
+</tr>
+<tr>
+<td><code>prop</code></td>
+<td>- the name of the property.</td>
+</tr>
+<tr>
+<td><code>val</code></td>
+<td>- the value.</td>
+</tr>
+</table>
+
+<a id="ASObject" name="ASObject"></a>
+<h2>ASObject class</h2>
+<p>
+This is the baseclass for all AlgoScore objects.
+</p>
+<h3>ASObject.children{}</h3>
+<p>
+A table of objects that depends on this object. Used for
+dependency resolution when sorting the object tree.
+</p>
+<h3>ASObject.clean_globals(namespace=nil)</h3>
+<p>
+Remove this object from the list of global suppliers.
+Additionally, if <code>namespace</code> is non-nil, add
+<code>G_set(sym,val)</code> and <code>G_get(sym)</code> to the namespace.
+</p>
+<h3>ASObject.set_global(sym, val)</h3>
+<p>
+Set global variable <code>sym</code> to <code>val</code> and register
+this object as the supplier for that variable.
+</p>
+<h3>ASObject.get_global(sym)</h3>
+<p>
+Get global variable <code>sym</code> and add this object
+as a children to the supplier of that variable.
+</p>
+<h3>ASObject.remake_surface()</h3>
+<p>
+Recreate the current graphics cache for this object.
+</p>
+<h3>ASObject.get_label()</h3>
+<p>
+Return a label for this object, in the format classname[ID].
+Can be overridden by subclasses if wanted.
+</p>
+<h3>ASObject.dump()</h3>
+<p>
+Return a textual string that will create this object and all
+its properties if compiled and executed as nasal code.
+</p>
+<h3>ASObject.duplicate(ghost=0)</h3>
+<p>
+Create a copy of this object with all its properties.
+If <code>ghost</code> is non-zero, create a ghost copy.
+</p>
+<h3>ASObject.edit_event(ev)</h3>
+<p>
+Override this to handle key and mouse events in <i>edit mode</i>.
+<code>ev</code> is a standard GTK event.
+</p>
+<h3>ASObject.edit_start()</h3>
+<p>
+Called when the user requests <i>edit mode</i> on this object.
+Return 1 to stay in edit mode (events will be sent to me.edit_event())
+or 0 to exit edit mode.
+</p>
+<h3>ASObject.edit_end()</h3>
+<p>
+Called when the user exits <i>edit mode</i> on this object.
+</p>
+<h3>ASObject.add_obj_prop(name, sym=nil, cb=nil, no_eval=0)</h3>
+<p>
+Add an object property.
+</p>
+<table>
+<tr>
+<td><code>name</code></td>
+<td>- the name of the property as shown in the GUI.</td>
+</tr>
+<tr>
+<td><code>sym</code></td>
+<td>- the symbol of the property as stored in the object. Defaults to <code>name</code>.</td>
+</tr>
+<tr>
+<td><code>cb</code></td>
+<td>- the callback to be called when this property changed.</td>
+</tr>
+<tr>
+<td><code>no_eval</code></td>
+<td>- if 0, evaluate the property as nasal code, else treat it as a string.</td>
+</tr>
+</table>
+
+<h3>ASObject.del_obj_prop(name)</h3>
+<p>
+Delete an object property.
+</p>
+<h3>ASObject.set_prop(name, val)</h3>
+<p>
+Set an object property.
+</p>
+<h3>ASObject.get_prop(name)</h3>
+<p>
+Get an object property.
+</p>
+<h3>ASObject.new_inlet(name)</h3>
+<p>
+Create new inlet.
+</p>
+<h3>ASObject.del_inlet(name)</h3>
+<p>
+Disconnect and remove inlet.
+</p>
+<h3>ASObject.delete_all_inlets()</h3>
+<p>
+Delete all inlets.
+</p>
+<h3>ASObject.disconnect_all()</h3>
+<p>
+Disconnect all inlets.
+</p>
+<h3>ASObject.new_outlet(name, res=0, ipol=0)</h3>
+<p>
+Add a new outlet.
+</p>
+<table>
+<tr>
+<td><code>name</code></td>
+<td>- the name of the outlet.</td>
+</tr>
+<tr>
+<td><code>res</code></td>
+<td>- sample resolution in seconds or 0 for event data.</td>
+</tr>
+<tr>
+<td><code>ipol</code></td>
+<td>- 1 to interpolate between events or samples.</td>
+</tr>
+</table>
+
+<h3>ASObject.cleanup()</h3>
+<p>
+Override this to define a handler for cleaning up
+when this object is destroyed.
+</p>
+<h3>ASObject.destroy(all=0)</h3>
+<p>
+Destroy this object and call all cleanup handlers in the
+class parents. If <code>all</code> is zero, unregister it from the
+score and remove all connections, etc...
+</p>
+<h3>ASObject.get_parents()</h3>
+<p>
+Return a table of all objects connected to this object.
+</p>
+<h3>ASObject.has_parents()</h3>
+<p>
+Return 1 if any objects are connected to this object.
+</p>
+<h3>ASObject.has_parents_in(list)</h3>
+<p>
+Return 1 if any objects in <code>list</code> are connected to this object.
+</p>
+<h3>ASObject.xy_inside(x,y)</h3>
+<p>
+Return true if x,y is inside the active "click region" of object.
+Can be overridden by subclasses.
+</p>
+<h3>ASObject.connect(src, outlet, inlet, pos=nil)</h3>
+<p>
+Connect <code>outlet</code> of object <code>src</code> to <code>inlet</code> on this object.
+If <code>pos</code> is given, set connections graphical position.
+Returns the created <a href="#Connection">Connection</a> object or nil if failed.
+</p>
+<h3>ASObject.connect_done(src, outlet, inlet)</h3>
+<p>
+Override this to be called when connection is done.
+</p>
+<h3>ASObject.disconnect(src, inlet, do_update=1)</h3>
+<p>
+Disconnect object <code>src</code>from <code>inlet</code> on this object.
+If <code>do_update</code> is zero, don't update this object.
+</p>
+<h3>ASObject.query_inlets()</h3>
+<p>
+Override this to be called before user gets the list of available
+inlets.
+</p>
+<h3>ASObject.add_link(src, t)</h3>
+<p>
+Add link from object <code>src</code> to this object,
+at position <code>t</code> in seconds.
+</p>
+<h3>ASObject.is_linked(src)</h3>
+<p>
+Return 1 if this object is linked with <code>src</code>.
+</p>
+<h3>ASObject.remove_link(src)</h3>
+<p>
+Remove any link between this object and <code>src</code>.
+</p>
+<h3>ASObject.remove_all_links()</h3>
+<p>
+Remove all links between this object and any other object.
+</p>
+<h3>ASObject.get_alignments()</h3>
+<p>
+Return a list of alignment points (in seconds)
+of this object. Defaults to a sorted <code>me.alignments</code>
+with 0 and <code>me.length</code> added.
+</p>
+<h3>ASObject.get_object_tree()</h3>
+<p>
+Returns the topological sort of the dependency tree with this
+object as the root object.
+</p>
+<h3>ASObject.update_now()</h3>
+<p>
+Force update of this object now.
+</p>
+<h3>ASObject.generate()</h3>
+<p>
+The subclass-provided function that generates the data for this object,
+called when this object is updated.
+Should return 0 if finished, or 1 if not. Most classes should return 0,
+returning 1 is for the case of output busses at the end of the connection
+graph, which might render in a background thread. They should then set
+obj.pending_update to 0 when the thread finishes.
+</p>
+<h3>ASObject.cancel_generate()</h3>
+<p>
+Output busses that render in background threads can define this to
+be called when the user asks to cancel the processing.
+</p>
+<h3>ASObject.update(children_only=0)</h3>
+<p>
+Update object.
+Call this whenever the object and all its children should generate
+it's data. For example after user-editing some property or data of the object.
+</p>
+<p>
+<code>children_only</code>:
+</p>
+<table>
+<tr>
+<td>0</td>
+<td>- for this obj and it's children,</td>
+</tr>
+<tr>
+<td>1</td>
+<td>- for children only,</td>
+</tr>
+<tr>
+<td>-1</td>
+<td>- for this obj only, but set pending update for children.</td>
+</tr>
+</table>
+
+<h3>ASObject.update_if_connected()</h3>
+<p>
+Update this object if it is connected to any other object.
+</p>
+<h3>ASObject.redraw()</h3>
+<p>
+Sets <code>redraw</code> flag to indicate that this object needs redrawing.
+Call this whenever the object should redraw.
+The flag is checked by Score.redraw() 
+</p>
+<h3>ASObject.move_resize_done(moved, resized)</h3>
+<p>
+Called after object has been moved (start or ypos changed)
+and/or resized (length changed). Could be overridden by subclass.
+</p>
+<h3>ASObject.draw(cr, ofs, width, last)</h3>
+<p>
+The subclass-provided function that draws the object.
+</p>
+<table>
+<tr>
+<td><code>cr</code></td>
+<td>- cairo context to draw on.</td>
+</tr>
+<tr>
+<td><code>ofs</code></td>
+<td>- offset into the total object width that this sub-surface starts on. That is, the x pixel that 0 corresponds to. Zero when drawing on the first sub-surface.</td>
+</tr>
+<tr>
+<td><code>width</code></td>
+<td>- width of the sub-surface, clipped to the total object width in the last sub-surface, where <code>last</code> is 1 instead of 0.</td>
+</tr>
+</table>
+
+<h3>ASObject.update_geometry(cr, canvas_width)</h3>
+<p>
+The subclass-provided function that updates obj.width.
+Default is based exactly on obj.length.
+</p>
+<h3>ASObject.interpolate(outlet, a, b, x)</h3>
+<p>
+Function to interpolate between a and b, where x is between 0.0 and 1.0
+can be overridden by subclass.
+</p>
+<h3>ASObject.default_get_value(outlet, t)</h3>
+<p>
+Get value at time <code>t</code> on <code>outlet</code>, reading <code>outlet.data</code>
+as samples if <code>outlet.resolution</code> is non-zero or events if zero,
+interpolating with <code>me.interpolate()</code> if <code>outlet.interpolate</code> is non-zero.
+</p>
+<h3>ASObject.get_value(outlet, t)</h3>
+<p>
+Get value at time <code>t</code> on <code>outlet</code>.
+Can be overridden by subclass, default calls <code>me.default_get_value()</code>.
+Note that this might be called from an output bus background thread, and
+must be thread safe.
+</p>
+<h3>ASObject.default_get_event(outlet, index)</h3>
+<p>
+Get event number <code>index</code> on <code>outlet</code>,
+in the format <code>[t, value]</code>.
+Can be overriden by subclass.
+</p>
+<h3>ASObject.get_event(outlet, i)</h3>
+<p>
+Get event at index <code>i</code> on <code>outlet</code>.
+Can be overridden by subclass, default calls <code>me.default_get_event()</code>.
+Note that this might be called from an output bus background thread, and
+must be thread safe.
+</p>
+<h3>ASObject.get_datasize(outlet)</h3>
+<p>
+Get number of elements in <code>outlet.data</code>, either number of
+events or number of samples.
+Can be overriden by subclass.
+</p>
+<a id="Inlet" name="Inlet"></a>
+<h2>Inlet class</h2>
+<p>
+An Inlet object is a named input slot of an object, and holds any number
+of <a href="#Connection">connection</a> objects.
+</p>
+<h3>Inlet.add_con_prop(name, sym=nil, init=nil, cb=nil, no_eval=1)</h3>
+<p>
+Add a property for connections to this inlet.
+Arguments is similar to <a href="#ASObject">ASObject</a>.add_obj_prop().
+<code>init</code> is a table of symbols and their initialization values.
+</p>
+<h3>Inlet.get_connections()</h3>
+<p>
+Returns a list of all Connection objects for this inlet.
+Also sets <code>inlet.datasize</code> as the sum of each connections datasize,
+and <code>connection.datasize</code> which is retreived through <code>source_obj.get_datasize(outlet).</code>
+</p>
+<h3>Inlet.con_finder()</h3>
+<p>
+Returns a cached connection-finder, which is a function <i>f(t)</i> that returns the relevant
+connection at time <code>t</code>. As long as <code>t</code> is not less than it was the last time, the
+search will start at the last found connection.
+Returns nil if inlet is not connected.
+</p>
+<h3>Inlet.val_finder(default=nil)</h3>
+<p>
+Returns a cached value-finder, which is a function <i>f(t)</i> that returns
+the value at time <code>t</code> from the connection at time <code>t</code>, or the value of <code>default</code>
+if inlet is not connected.
+</p>
+<h3>Inlet.val_finder_num(default=nil)</h3>
+<p>
+Returns a cached value-finder, which is a function <i>f(t)</i> that returns
+the value at time <code>t</code> from the connection at time <code>t</code>, or the value of <code>default</code>
+if inlet is not connected or the value is not a number.
+</p>
+<a id="Connection" name="Connection"></a>
+<h2>Connection class</h2>
+<p>
+A Connection object holds a connection from a source object and outlet.
+It will also hold properties specific for this connection.
+</p>
+<h3>Connection.set_prop(sym, val)</h3>
+<p>
+Set property.
+</p>
+<h3>Connection.get_prop(sym)</h3>
+<p>
+Get property.
+</p>
+<h3>Connection.get_resolution()</h3>
+<p>
+Returns the value of <code>outlet.resolution</code> for this connections
+source object and outlet.
+</p>
+<h3>Connection.get_interpolate()</h3>
+<p>
+Returns the value of <code>outlet.interpolate</code> for this connections
+source object and outlet.
+</p>
+<h3>Connection.get_value(t)</h3>
+<p>
+Get the value of this connections source object and outlet at time <code>t</code>.
+</p>
+<h3>Connection.get_event(i)</h3>
+<p>
+Get the event of this connections source object and outlet at index <code>i</code>.
+</p>
+<a id="toc62" name="toc62"></a>
+<h2>Nasal libraries</h2>
+<p>
+The official nasal library docs can be seen <a href="nasal-lib.html">here</a>.
+<b>TODO</b> copy the relevant parts from above doc and also include additional
+libs by algoscore, modifications, etc...
+</p>
+<a id="examples" name="examples"></a>
+<h1>Examples</h1>
+<p>
+This section comments on the examples found in the <code>AlgoScore/examples</code> folder.
+</p>
+<a id="toc64" name="toc64"></a>
+<h2>test.orc</h2>
+<p>
+The following csound examples uses the orchestra file below.
+It defines 4 simple instruments, and exports the global variables
+<code>gkb</code> and <code>gkc</code> as <code>tone_amp</code> and <code>tone_pitch</code> channels.
+</p>
+<pre>
+sr = 44100
+kr = 4410
+nchnls = 2
+
+0dbfs = 1
+
+gkb chnexport "tone_amp", 1
+gkc chnexport "tone_pitch", 1
+
+gisine ftgen 0, 0, 2048, 10, 5, 1
+
+instr 1
+    a1 oscil p5*gkb, p4+gkc*100, gisine
+    a1 linen a1, p3*0.3, p3, p3*0.3
+
+    outs a1*0.2, a1*0.2
+endin
+
+instr 3
+    a1 oscil p5, p4, gisine
+    a1 linen a1, 0, p3, p3
+    a1 mirror a1, -0.3, 0.3
+    outs a1, a1
+endin
+
+instr 4
+    k1 linen 1, p3*0.9, p3, 0
+    a1 pinkish k1*0.2
+
+    ktrig metro 50
+    if ktrig == 1 then
+      outvalue "tag", p1
+      outvalue "amp", k1
+    endif
+
+    outs a1, a1
+endin
+
+instr 5
+    a1 oscil p5, p4, p6
+    a1 linen a1, p3*0.5, p3, p3*0.5
+    al linen a1, p3, p3, 0
+    ar linen a1, 0, p3, p3
+    outs al*0.5, ar*0.5
+endin
+</pre>
+<p></p>
+<a id="toc65" name="toc65"></a>
+<h2>csound_test.as</h2>
+<p>
+This is a simple csound test that uses single csound event objects and
+control curves connected to a csound bus.
+</p>
+<p>
+<img align="bottom" src="csound_test.png" border="0" alt=""/>
+</p>
+<p>
+The five objects with a circled number at the top are single csound events
+(<code>cs_instr</code>). The number in the circle is the instrument number, optional
+numbers after that are extra parameters. (p4, p5, ...)
+The csound event objects are connected to the <code>events</code> inlet on a
+<code>csound_bus</code> which uses the <code>test.orc</code> orchestra file.
+</p>
+<p>
+Below the csound bus, there is one <code>jitter</code> object controlling the
+amplitude on a <code>sine</code> object, with the frequency controlled by a
+<code>linseg</code> object through a transfer function (<code>1+x*6</code>).
+</p>
+<p>
+The <code>sine</code> object is then connected to the <code>tone_amp</code>
+inlet of the csound bus, as exported by the <code>chnexport</code> opcode in the
+<code>test.orc</code> orchestra file.
+</p>
+<p>
+At the bottom, another <code>linseg</code> is connected directly to the <code>tone_pitch</code>
+inlet of the csound bus. This linseg is linked with one of the
+single event objects at the top, shown as a dotted line.
+</p>
+<a id="toc66" name="toc66"></a>
+<h2>evgen_test.as</h2>
+<p>
+This is a more advanced example of how nasal code can be used in the score
+to generate events algorithmically.
+</p>
+<p>
+<img align="bottom" src="evgen_test.png" border="0" alt=""/>
+</p>
+<p>
+At the top is a <code>datagen</code> object that holds editable nasal code that generate
+events. (press <span class="key">e</span> on it to edit). It is connected to an <code>evgraph</code> object to visualize the events,
+and to a <code>csound_bus</code> using the <code>test.orc</code> orchestra file for synthesis.
+</p>
+<p>
+Two <code>linseg</code> objects are connected to <i>aux inlets</i> <code>A</code> and <code>B</code> on the
+<code>datagen</code> object. (These inlets are created with the <code>aux_inputs</code>
+property).
+</p>
+<p>
+A <code>cs_ftab</code> object is connected to the <code>ftable</code> inlet on the csound bus,
+and defines table 1 to be a breakpoint curve using the GEN7 routine. The csound
+bus sends the generated table back to the <code>cs_ftab</code> object for visualization.
+</p>
+<h3>datagen code</h3>
+<p>
+The code inside the <code>datagen</code> object first assigns some variables that
+we will use later:
+</p>
+<table>
+<tr>
+<td><code>seed</code></td>
+<td>random seed number</td>
+</tr>
+<tr>
+<td><code>n</code></td>
+<td>number of events to generate</td>
+</tr>
+<tr>
+<td><code>maxdur</code></td>
+<td>maximum duration of events</td>
+</tr>
+<tr>
+<td><code>mindur</code></td>
+<td>minimum duration of events</td>
+</tr>
+</table>
+
+<p>
+It then seeds the random generator and creates a vector <code>v</code> with size <code>n</code>.
+</p>
+<p>
+The <code>forindex</code> loop iterates through the vector (<code>n</code> times), and sets some
+variables to be used to build the event. Some of them are randomized, and some
+also takes input from the <code>A</code> and <code>B</code> <i>aux inlets</i> to control the maximum
+of the generated events amplitude and pitch.
+</p>
+<p>
+The following variables are automatically available to the code:
+<code>input</code> is a table of input functions in the form <i>INLET(t)</i> where t is time.
+<code>length</code> is the length of the object.
+</p>
+<p>
+The last line in the loop puts the generated event as element <code>i</code> in vector
+<code>v</code>.
+</p>
+<p>
+When the loop is finished, the vector <code>v</code> is put in <code>out.data</code>
+which is the place where generated events should be stored.
+</p>
+<a id="toc67" name="toc67"></a>
+<h2>midi_test.as</h2>
+<p>
+<img align="bottom" src="midi_test.png" border="0" alt=""/>
+</p>
+<p>
+This is a demonstration of the MIDI bus, in this example note events are
+generated with a <code>datagen</code> object and a couple of curve objects makes control
+change events.
+</p>
+<a id="toc68" name="toc68"></a>
+<h2>transfunc_aux_test.as</h2>
+<p>
+<img align="bottom" src="transfunc_aux_test.png" border="0" alt=""/>
+</p>
+<p>
+Demonstrating the flexible power of <i>aux inlets</i> and transfer functions.
+</p>
+<a id="osxbuild" name="osxbuild"></a>
+<h1>Building on Mac OS X</h1>
+<p>
+Compiling AlgoScore on OS X should be easy as long as you have the necessary
+dependencies installed.
+</p>
+<p>
+The instructions below should create a universal binary (running on both
+PPC and Intel). To make a non-universal
+binary, ignore the <code>+universal</code> flags to port install and comment out
+the <code>set (CMAKE_OSX_ARCHITECTURES ppc;i386 )</code> line in src/CMakeLists.txt.
+</p>
+<a id="toc70" name="toc70"></a>
+<h2>Dependencies</h2>
+<p>
+Except for the already mentioned <a href="#osxinstall">run-time dependencies</a>
+you need to install the following packages, needed for the build process:
+</p>
+<ul>
+<li><a href="#xcode">XCodeTools</a>
+</li>
+<li><a href="#macports">MacPorts</a>
+  <ul>
+  <li><a href="#cmake">cmake</a> (build-dependency only)
+  </li>
+  <li><a href="#gtk">gtk2</a>
+  </li>
+  <li><a href="#libsndfile">libsndfile</a>
+  </li>
+  <li>liblo (optional, for OSC support)
+  </li>
+  <li>pcre (optional)
+  </li>
+  </ul>
+</li>
+</ul>
+
+<p>
+If you already have an old MacPorts installed, please run
+<code>sudo port selfupdate</code> now.
+</p>
+<h3>Build the dependencies</h3>
+<p>
+Open a terminal and do:
+</p>
+<pre>
+sudo port install cmake
+sudo port install liblo +universal
+sudo port install libsndfile +universal
+sudo port install gtk2 +quartz +no_x11 +universal
+</pre>
+<p>
+Note that gtk2 may take a couple of hours to compile!
+</p>
+<p>
+If the <code>port</code> command could not be found, it might be because 
+some versions of MacPorts fails to set up your shell variables, try this in a Terminal
+to fix it:
+</p>
+<pre>
+curl -Lo postflight http://tinyurl.com/2qqbth &amp;&amp; bash postflight
+</pre>
+<p>
+Then restart Terminal for the new variables to take effect.
+</p>
+<h3>PCRE trouble</h3>
+<p>
+Currently it seems that the PCRE port does not work with +universal, PCRE is not needed
+for AlgoScore to work so you can safely ignore this. 
+</p>
+<h3>GTK trouble</h3>
+<p>
+ATK might not build with +universal, if not then add these lines to the ATK portfile at
+/opt/local/var/macports/sources/rsync.macports.org/release/ports/devel/atk/Portfile
+</p>
+<pre>
+platform darwin 8 { 
+  configure.env-append    MACOSX_DEPLOYMENT_TARGET=10.4 
+  build.env-append        MACOSX_DEPLOYMENT_TARGET=10.4 
+}
+
+</pre>
+<p>
+and try again...
+</p>
+<h3>Make a universal CsoundLib</h3>
+<p>
+CsoundLib needs to be made universal if building a universal AlgoScore. 
+</p>
+<ul>
+<li>Get CsoundLib from the other platforms package (ppc if you're on i386, etc...),
+it's in /Library/Frameworks/CsoundLib.framework/Versions/Current/CsoundLib.
+NOTE: You can extract the file by unpacking <code>CsoundLib.pkg/Contents/Archive.pax.gz</code> instead of
+finding another machine or installing a package for the wrong platform on your own machine.
+</li>
+<li>Name the original one <code>CsoundLib.1</code> and the other one <code>CsoundLib.2</code>
+</li>
+<li>Use lipo to create a universal:
+<pre>
+$ sudo lipo -create CsoundLib.1 CsoundLib.2 -output CsoundLib
+</pre>
+</li>
+<li>Check that it worked:
+<pre>
+$ cd /Library/Frameworks/CsoundLib.framework/Versions/Current/         
+$ file CsoundLib
+CsoundLib: Mach-O universal binary with 2 architectures
+CsoundLib (for architecture i386):      Mach-O dynamically linked shared library i386
+CsoundLib (for architecture ppc):       Mach-O dynamically linked shared library ppc
+</pre>
+</li>
+<li>Replace the libsndfile shipped with csound with a link to the universal one you built yourself:
+<pre>
+$ ln -sf /opt/local/lib/libsndfile.1.0.17.dylib /usr/local/lib/libsndfile.1.0.17.dylib
+</pre>
+</li>
+</ul>
+
+<a id="toc71" name="toc71"></a>
+<h2>Configure and build</h2>
+<p>
+Now enter the unpacked AlgoScore folder and build it:
+</p>
+<pre>
+cd AlgoScore/src
+source setup_osx_env.sh
+./make_build
+</pre>
+<p></p>
+<p>
+There will be a couple of warnings regarding architecture mismatch, ignore these as long as it all
+ends with a line saying <code>[100%] Built target algoscore</code>...
+</p>
+<p>
+If you want to make a clean rebuild, remove the old <code>build</code> folder first.
+</p>
+<a id="toc72" name="toc72"></a>
+<h2>Testing the binary</h2>
+<p>
+If the build succeeded without errors you should be able to test AlgoScore:
+</p>
+<pre>
+cd AlgoScore
+./algoscore
+</pre>
+<p></p>
+<a id="toc73" name="toc73"></a>
+<h2>Make an Application bundle</h2>
+<p>
+If you were able to run the resulting binary, you probably want to create a
+stand-alone clickable application bundle so that you don't need to bother with
+the Terminal:
+</p>
+<pre>
+cd AlgoScore/src/macosx
+./make_app
+</pre>
+<p>
+The resulting package should show up as <code>AlgoScore/src/macosx/AlgoScore.app</code>,
+which you can move to some good place and put in your dock.
+</p>
+<p>
+Note that all dependencies except the already mentioned
+<a href="#osxinstall">run-time dependencies</a> gets embedded in the AlgoScore.app application
+bundle and does not need to be installed for the AlgoScore.app to run.
+</p>
+<a id="toc74" name="toc74"></a>
+<h1>Other software</h1>
+<p>
+This section contains short descriptions of various software related to building
+or running AlgoScore. The descriptions below are based on each projects own wordings
+from their websites.
+</p>
+<a id="nasal" name="nasal"></a>
+<h2>Nasal</h2>
+<p>
+Nasal is an embeddable scripting language, with features like dynamic typing,
+garbage collection, and a small footprint. The syntax is similar to C and
+JavaScript, and is easy to learn.
+</p>
+<p>
+Most of AlgoScore is written in Nasal, and it has a built-in Nasal interpreter with
+bindings to GTK, Cairo, Csound, and more.
+</p>
+<p>
+More information and documentation: <a href="http://plausible.org/nasal">http://plausible.org/nasal</a>
+</p>
+<a id="jack" name="jack"></a>
+<h2>JACK</h2>
+<p>
+JACK Audio Connection Kit is a low-latency audio server, written for POSIX
+conformant operating systems such as GNU/Linux and Apple's OS X. It can connect
+a number of different applications to an audio device, as well as allowing them
+to share audio between themselves. Recent versions also supports MIDI.
+</p>
+<p>
+AlgoScore uses JACK to play audio and MIDI.
+</p>
+<p>
+More information and downloads: <a href="http://jackaudio.org">http://jackaudio.org</a>
+</p>
+<a id="csound" name="csound"></a>
+<h2>Csound</h2>
+<p>
+Csound is a sound design, music synthesis and signal processing system,
+providing facilities for composition and performance over a wide range of
+platforms. It is not restricted to any style of music, having been used for many
+years in the creation of classical, pop, techno, ambient, experimental, and (of
+course) computer music, as well as music for film and television.
+</p>
+<p>
+More information and downloads: <a href="http://csounds.com">http://csounds.com</a>
+</p>
+<a id="libsndfile" name="libsndfile"></a>
+<h2>Libsndfile</h2>
+<p>
+Libsndfile is a C library for reading and writing files containing sampled sound
+(such as MS Windows WAV and the Apple/SGI AIFF format) through one standard
+library interface.
+</p>
+<p>
+More information and downloads: <a href="http://www.mega-nerd.com/libsndfile">http://www.mega-nerd.com/libsndfile</a>
+</p>
+<a id="rox" name="rox"></a>
+<h2>ROX-Filer</h2>
+<p>
+ROX is a fast, user friendly desktop which makes extensive use of drag-and-drop.
+The interface revolves around the file manager, or filer, following the
+traditional Unix view that "everything is a file" rather than trying to hide the
+filesystem beneath start menus, wizards, or druids. The aim is to make a system
+that is well designed and clearly presented.
+</p>
+<p>
+AlgoScore does not depend on ROX in any way, but the source package ships with an
+AppRun script that makes it easy to start AlgoScore under ROX.
+</p>
+<p>
+More information and downloads: <a href="http://rox.sf.net">http://rox.sf.net</a>
+</p>
+<a id="gtk" name="gtk"></a>
+<h2>GTK+</h2>
+<p>
+GTK+ is a highly usable, feature rich toolkit for creating
+graphical user interfaces which boasts cross platform compatibility and an easy
+to use API.
+</p>
+<p>
+More information and downloads: <a href="http://gtk.org">http://gtk.org</a>
+</p>
+<a id="xcode" name="xcode"></a>
+<h2>XCodeTools</h2>
+<p>
+Xcode is Apple's premiere development environment for Mac OS X.
+It includes the powerful GCC compiler and other tools needed for building
+applications from source.
+</p>
+<p>
+In addition to being packaged on the DVD with every copy of Mac OS X, the latest
+Xcode can be downloaded at Apple's developer website.
+</p>
+<p>
+See <a href="http://developer.apple.com/tools/xcode">http://developer.apple.com/tools/xcode</a> for more information.
+</p>
+<a id="macports" name="macports"></a>
+<h2>MacPorts</h2>
+<p>
+The MacPorts Project is an open-source community initiative to design an
+easy-to-use system for compiling, installing, and upgrading either command-line,
+X11 or Aqua based open-source software on the  Mac OS X operating system.
+</p>
+<p>
+More information and downloads: <a href="http://www.macports.org">http://www.macports.org</a>
+</p>
+<a id="cmake" name="cmake"></a>
+<h2>CMake</h2>
+<p>
+CMake is a cross-platform, open-source build system. It is
+used to control the software compilation process using simple platform and
+compiler independent configuration files. CMake generates native makefiles and
+workspaces that can be used in the compiler environment of your choice.
+</p>
+<p>
+More information and downloads: <a href="http://www.cmake.org">http://www.cmake.org</a>
+</p>
+</div>
+
+<!-- xhtml code generated by txt2tags 2.3.2 (http://txt2tags.sf.net) -->
+<!-- cmdline: txt2tags -t xhtml -o algoscore-manual.html main.t2t -->
+</body></html>

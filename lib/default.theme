@@ -1,0 +1,36 @@
+gtk-error-bell = 0
+
+style "monofont" {
+    font_name = "Mono"
+}
+
+style "bigmono" {
+    font_name = "Mono 16"
+}
+
+style "tool_label" {
+    font_name = "Sans 16"
+}
+
+style "default" {
+    GtkRange::slider_width = 12
+    GtkRange::stepper_size = 12
+    GtkScrollbar::min_slider_length = 12
+    GtkCheckButton::indicator_size=10
+    GtkRadioButton::indicator_size=12
+    GtkStatusbar::shadow_type = none
+
+    GtkNotebook::tab_vborder = 1
+    GtkNotebook::tab_hborder = 1
+    xthickness = 1
+    ythickness = 1
+
+    font_name = "Sans"
+}
+
+gtk-toolbar-icon-size = small-toolbar
+
+class "*" style "default"
+widget "*.monotext" style "monofont"
+widget "*.timelabel" style "bigmono"
+widget "*.tool_label" style "tool_label"

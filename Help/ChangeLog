@@ -1,0 +1,472 @@
+- Updates to AlgoScore Users Manual, added some information to
+  the "Internals" section.
+
+- The 'datagen' class now supports multiple outlets, defined in the
+  'outlets' property which is a table of outlet names and their
+  interpolate flag. Each outlet is available by name in the code
+  as usual, the default is one outlet named 'out'.
+
+- The 'datagen' class now allows custom transfer functions to be defined
+  per outlet in 'out.transfunc', it's called with two args: value and time.
+  Example: "out1.transfunc = func(v,t) v*127;"
+
+- The 'funcbus' class now supports multiple outlets, defined in the
+  'outlets' property which is a table of outlet names and their
+  interpolate flag. The outlet asked for is available in the 'outlet'
+  variable. Example: "{out1:x*10,out2:x/2}[outlet]"
+  For each outlet, an 'out.interpolate' property is created.
+
+- The 'funcbus' class now sets the 'ev' variable to the value of
+  the actual event when a target object asks for an event by index.
+  Otherwise it's set to the value of the event inlet at time t.
+  This is needed to handle multiple events with the same time and/or
+  overlapping source objects.
+
+- ASPlotObj (parent class for all curve-drawing classes) now has a
+  'smooth' property which uses cosine interpolation if set to 1.
+
+- Outlet resolution and interpolate flag are now shown in
+  the object inspector window.
+
+- 'evgraph' class now ignores events with nil value.
+
+- If algoscore gets disconnected from JACK, playing should now
+  work again after using the "Reconnect JACK" menu action.
+
+- Fixed crash that happened if trying to play a new csound bus that
+  hadn't generated any audio.
+
+- GTK module: Fixed freeze that happened sometimes when a signal
+  handler was destroyed, like after closing a window or popup dialog.
+
+- Re-use object creation window instead of creating and destroying
+  it each time.
+  
+- Catch errors more cleanly when calling obj.generate().
+
+- Move printerr from logwin.nas to C func in algoscore.c so that
+  it can be reached from all nasal modules.
+  Fixed "undefined symbol: printerr" error that happened if trying
+  to open a project with unknown object properties.
+
+- Keep dialogs above and centered on main window.
+
+081112:
+
+Preliminary JACK transport support:
+
+- Send JACK transport start/stop/locate.
+
+Class improvements and new classes:
+
+- Added 'morph' class that interpolates between two inputs
+  linearly or according to a control input. Vectors and hashes are
+  handled recursively. The interpolating function can be customized.
+  See examples/morph_test.as for an example.
+
+- Clip 'x' to 0.0-1.0 in 'funcbus' class.
+
+- The 'funcbus' class now handles get_event() and has an 'event' inlet
+  that is used to get event times for synthesized events. This can be
+  used to pack events by combining different inputs and expressions.
+  See examples/event_pack.as for an example.
+
+- The 'datagen' class now exports an 'inlets' variable for direct access
+  to the inlets, for use of Inlet.get_connections() and such.
+  See examples/datagen_evget.as for an example.
+
+Appearance and user interface:
+
+- Integrate with the native OS X app menu bar.
+
+- Support one-button mice: use Command-click as right-click on OS X.
+
+- Change cursor appearance when moving/resizing/aligning/etc...
+
+- Clickable toolbox icons.
+
+- Ctrl-double-click to open properties window.
+
+Bug fixes:
+
+- Fixed drawing bug in ASPlotObj base class.
+
+- Fixed bug in ASObject.val_finder_num() that made it return
+  default value if input was a numeric 0.
+
+- Some more explicit destroying of cairo contexts, also do the same
+  with cairo surfaces.
+
+081105:
+
+- Fixed bug in OSC/MIDI event sort.
+
+- Updates to AlgoScore Users Manual: how to build an OS X universal app
+  that actually works.
+  
+- Link to liblo even if it's not pulled in by csound.
+
+- OSC support: Use gettimeofday() instead of clock_gettime() on systems
+  without POSIX highres timers (like OS X).
+
+081103:
+
+- Updated build system for Mac OS X.
+
+- Free cairo contexts explicitly after usage instead of leaving them for
+  the garbage collector. Fixes crash under GTK Quartz on Mac OS X.
+
+- Set gtk-error-bell to 0, fixes annoying beeps on some systems.
+
+- Updates to AlgoScore Users Manual.
+
+- Disable OSC support if system doesn't have POSIX timers.
+
+- Added Inlet.val_finder_num() that returns default value if value is
+  not a single numeric.
+
+- Use val_finder_num() in classes defined in plot.nas
+
+- Added 'interpolation' out property on jitter object.
+
+- Fixed bug in ASObject.default_get_value() that returned nil if first
+  event didn't start at time zero.
+  
+- Fixed bug that gave an error when creating an OSC bus.
+
+- Added some more examples.
+
+- Improved OSC sequencer, don't use a fixed tick resolution but
+  output the events at the right time. This means less CPU
+  usage and more precise timing.
+
+081027:
+
+- OpenSoundControl output through 'osc_bus' object.
+
+  Each bus has an 'osc_address' in the form 'osc.udp://hostname:port',
+  and a 'controllers' property, which takes a table of inlet names and
+  their OSC path and typetag strings:
+  
+  { freq: ['/foo/bar/freq','f'],
+    note:  ['/zoo/note','iff'],
+    ...
+  }
+  
+  A running JACK server is still needed, though OSC output isn't actually
+  using it. (This might change in the future)
+  
+  The OSC output time resolution is 5 mS for the moment, defined in
+  playbuslib.c. (This might also change in the future)
+
+- Display warning message if there's no exportable busses in the score
+  when doing File->Export bus.
+
+- Double click on object to enter edit mode.
+
+- Fixed some behaviour of edit mode.
+
+- Use (unsigned int) instead of (useconds_t) in src/nasal/unixlib.c
+
+081020:
+
+- Now also builds and works with double precision Csound
+
+- MIDI bus export to file.
+
+- Merged new nasal features from Andy Ross:
+
+  * Call-by-name argument lists to functions. You can now pass a hash
+    literal as the argument list of a function to define the local
+    variable lists, e.g.: "rect_area(width:12, length:24)"
+
+  * Multiple assignments. You can now parenthesize a list of lvalues to
+    be assigned in one statement, e.g.:
+  
+    (a, var b, var c) = (1, 2, 3);
+    (h["foo"], o.fld, v[99]) = (3, 4, 5);
+    (a, b) = [1, 2];        # It even works with runtime vectors
+    var (a, b) = (1, 2);    # shorthand for "(var a, var b)"
+
+  * Vector slicing. You can now generate a vector from a list of indices
+    or ranges, e.g.:
+
+    var (uid, gid, size) = io.stat(filename)[4,5,7];
+    var tail = list[1:];
+    var prefix = list[0:length];
+
+- Merged nasal updates and bugfixes from Andy Ross
+
+- math.mirror() now handles multiple reflections by iterating until
+  the value is within range.
+
+080512:
+
+- Added function math.betarand(a,b), a beta distribution random generator.
+
+- Added optional mode parameter to math.trirand(mode=0.5) to set center of
+  the distribution.
+  
+- Added function math.pdf2cdf(v) to convert a probability density table
+  to a cumulative distribution table.
+  
+- Added function math.userrand(cdf), a random generator with distribution
+  according to the cumulative distribution table cdf.
+
+- Added optional strength parameter to math.quant(x, q, s=1).
+
+- Noise and Jitter objects now has 'randomizer' properties for customizing
+  the random generator, for example to use other distributions.
+  This can also be used to construct brownian motion:
+  'math.mirror(last+(math.rand()-0.5)*0.3,min,max)'
+  where 0.3 is the maximum stepsize.
+
+- FuncBus changes:
+  - a variable 'init' is 1 at the first evaluation after an update.
+  - save the namespace between evaluations.
+  Note the limited usage of these features, doing something like
+  'if(init) math.seed(42); math.rand();' does not yield a reproducable
+  sequence since 'init' is still 0 after the *receiving* objects updates,
+  and we don't know when or in what order those objects asks for a value.
+
+- Added 'plot' module to plot functions in a separate window. Example:
+  w = plot.new(func(x) math.sin(x), -math.pi, math.pi)
+
+- Fixed bug in console window that produced an error when the
+  commandline history was full. 
+  
+- Added obj.xy_inside() to detect click inside object, and
+  obj.get_con_top_ypos() and obj.get_con_bottom_ypos() to get vertical
+  connection position, so that subclasses can override this to correspond
+  more to the graphical appearance of the object.
+  Changed TextBus class to use this.
+
+- Fixes to OS X AlgoScore.app:
+  - AS logo should now be shown in about dialog also on OS X.
+  - Just launch AS through a script instead of using the compiled wrapper.
+  - Run xmodmap to use Command key as mod1 instead of Alt to work around
+    GTK vs X11 config problem.
+
+- Added 'printerr' function that prints error message in different color
+  and raises the log window.
+
+- Notify user at JACK shutdown.
+
+- Warn if csound and JACK samplerates mismatch.
+
+- Made the message dialog about custom userdata folder a bit more clear,
+  and mentioned it in the manual.
+
+- Handle multiple arguments in browser and editor settings, so that stuff
+  like 'open -e' works.
+
+- Updates to the Users Guide.
+
+- Removed the pre-built linux binary, a separate binary package might be
+  released on demand.
+
+080417:
+
+- ASObject.update(): call cancel_generate() on all objects later down the
+  dependency graph so that any running rendering threads don't try to access
+  data in source objects. (fixes crash when moving objects while rendering)
+
+- Report and recover from any runtime errors in background rendering threads.
+
+- Fixed crash with signal_bus due to trying to close a soundfile twice.
+
+080416:
+
+- Removed the font cache check in the OS X launcher script. It made AlgoScore
+  fail to start on some systems.
+
+- Re-create jack ports instead of renaming them on systems with "old" JACK.
+
+- Signal bus: render in background thread. Write data in chunks for faster
+  performance.
+
+- clear ringbuffers before starting play, to make sure it starts from silence.
+
+- Moved 'aux_inputs' from ASPlotObj to a separate AuxInputs class layer and
+  reused it in the CodeBus base class.
+  
+- Made 'funcbus' and 'datagen' classes use 'in.NAME(t)' for accessing inputs,
+  for consistency.
+
+- editor.nas: Default to 'open -e' for external editor on OS X and $EDITOR
+  variable on other platforms.
+
+- Show bus caption in export bus dialog, for easier identification of busses.
+
+- Changed the way the logwindow printing works, now append the text instead of
+  replacing the whole buffer. The 'max_log_size' was removed, but the logwindow
+  can now be cleared with Ctrl-L.
+  
+080412:
+
+- Fixed old jack midi API checks in playbuslib.c
+
+- Added 'signal_bus' to stream control data through JACK for high
+  resolution control of other applications.
+
+- Added beginning of a 'sndfile' nasal module.
+
+- Removed the concept of audio regions. It's currently not used and only
+  complicate things. Let each bus have only one soundfile cache.
+
+- Removed 'audio_bus' and 'sndfile' classes.
+  
+- JACK ports are now enumerated with two-digit number.
+  
+- Can now reconnect to JACK in case of JACK crash or zombification due
+  to timeout. Use the "Reconnect JACK" item on Score menu.
+
+- ASPlotObj: Clear caption string if transfunc is cleared.
+
+- Added object inspection window (press 'I' on an object)
+
+- Don't wait for process to return in browser.open_uri() and
+  editor.open_file(). Fixes bug that made AS freeze until the called
+  executable returns, like when the browser wasn't already running.
+
+080408:
+
+- Updated src/CMakeLists.txt, should now build on Mac OS X again.
+
+- Updated OS X build instructions in the Users Manual.
+
+- Explicitly disable rtmidi and rtaudio when calling csound in cs.nas
+
+- make_build now renames the old algoscore binary so that a new one
+  will be built automatically.
+
+- Updated README and AppRun script.
+
+080406:
+
+- Now depends on JackOSX 0.76 on OS X.
+
+- Added even more verbose license notices to each sourcefile, since
+  this is required for hosting at gna.org
+
+- Moved to CMake build system, run the make_build script in the
+  src folder to build AlgoScore.
+
+- Updates to users manual, added documentation of baseclasses from
+  algoscore.nas, extracted from source files with a sed script.
+  
+- Added Help menu with about dialog and link to included users manual.
+
+- Added browser.nas module to handle opening of URIs, defaults to
+  "open" on Mac OS X, on other systems the value of $BROWSER variable
+  or "firefox" if not set. The browser can be overridden in preferences.
+
+080401:
+
+- Updated class descriptions, and made the function that exports those
+  convert it from pango markup to txt2tag markup for automated inclusion
+  in the manual.
+
+- Mac OS X app bundle: fixed ScriptExec xcode project,
+  should now compile for both ppc and intel.
+
+080331:
+
+- Updates to users manual. Now using txt2tags for HTML generation.
+
+- Simplified examples/evgen_test.as
+
+080328:
+
+- Added copyright and license notices to included nasal files.
+
+- Upgraded to GNU GPL 3
+
+080327:
+
+- Set window icon
+
+- Fixed the dark theme, now with white text on dark background.
+
+- Fixes in inverted score palette file.
+
+- Added copyright and license notices to sourcefile headers
+
+080326:
+
+- If user_data_dir does not exist, open up a dialog to choose
+  or create the folder, and save it to options.
+
+- Escape "'" chars in debug.nas:dump(). It was this bug that made
+  examples/transfunc_aux_test.as fail to open.
+
+- Read gtk theme file before creating any widgets.
+
+- Fixes in dark.theme, but still can't get common widget foreground other
+  than black with gtk 2.12, so I lightened up the background for now...
+
+- HAVE_CSOUND automake conditional wasn't defined if csound wasn't found,
+  it's now set to false.
+
+- Added /usr/local to CPPFLAGS and LDFLAGS in configure.in since many
+  systems seems to need this...
+
+080319:
+
+- Don't autostart jack server (this should be handled by the user imho)
+
+- Removed check for csound.h in configure.in
+
+- Isak Johnsson added scripts to make a binary OS X application bundle,
+  based on scripts from Inkscape. Thanks Isak!
+
+- Updates to users manual
+
+080318:
+
+- ASPlotObj (and all derived classes) now has a transfer function
+  property that can be used to transform the data, which will also
+  be visualized in the graph.
+  The transfer func is called with the following variables set:
+    x, t, length, outlet, in, math
+  This means for example that a LinSeg with shape [0,1,1] can be
+  used to make arbitrary mathematical functions, like math.sin(x*6.283)
+  for a one-cycle sine shape, etc...
+  
+- ASPlotObj now has an 'aux_inputs' property, which can be accessed
+  from the transfer function, example:
+    aux_inputs = ['amp']
+    transfer_func = x*in.amp(t)
+
+- Jitter class now has 'mindur' and 'maxdur' inlets.
+
+- Fixed a bug in FuncBus class
+
+- Fixed a bug in drawing of unupdated region of busses.
+
+- Lots of additions and screenshots to the user manual:
+  getting started, using csound, examples.
+
+080317:
+
+- More fixes for OS X build: let AC_CHECK_FRAMEWORK
+  add "-Wl,-framework,$1" to $LDFLAGS
+
+- Updates to user manual.
+
+080315:
+
+- CodeBus and derived classes now has a 'inputs' property for the list
+  of inlets instead of creating them dynamically.
+
+- If a project tries to connect to non-existing inlets, they are created.
+
+- Updates to user manual.
+
+- Fixed some building problems for Mac OS X, bugs in configure script and
+  some missing includes.
+
+- Don't print "buffer underrun" in jack process() since it will take too
+  much time, leading to jack shutdown...
+
+- Added this ChangeLog (better late than never)

@@ -1,0 +1,7 @@
+:encoding: ISO-8859-1
+
+AlgoScore Introduction
+======================
+Jonatan Liljedahl <lijon@kymatica.com>
+
+include::as_intro.txt[]

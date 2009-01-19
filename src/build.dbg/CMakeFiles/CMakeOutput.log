@@ -1,0 +1,312 @@
+The system is: Linux - 2.6.22.7-Gobo - unknown
+Determining if the C compiler is GNU succeeded with the following output:
+# 1 "/Programs/CMake/2.4.7/share/cmake-2.4/Modules/CMakeTestGNU.c"
+# 1 "/Users/lijon/Coding/AlgoScore/src/build.dbg//"
+# 1 "<built-in>"
+# 1 "<command line>"
+# 1 "/Programs/CMake/2.4.7/share/cmake-2.4/Modules/CMakeTestGNU.c"
+
+void THIS_IS_GNU();
+
+Determining if the C++ compiler is GNU succeeded with the following output:
+# 1 "/Programs/CMake/2.4.7/share/cmake-2.4/Modules/CMakeTestGNU.c"
+# 1 "<built-in>"
+# 1 "<command line>"
+# 1 "/Programs/CMake/2.4.7/share/cmake-2.4/Modules/CMakeTestGNU.c"
+
+void THIS_IS_GNU();
+
+Determining if the C compiler works passed with the following output:
+make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Entering directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+/System/Links/Executables/cmake -E cmake_progress_report /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/testCCompiler.o
+/System/Links/Executables/gcc  -g -O2      -o CMakeFiles/cmTryCompileExec.dir/testCCompiler.o   -c /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/testCCompiler.c
+Linking C executable cmTryCompileExec
+/System/Links/Executables/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/System/Links/Executables/gcc   -g -O2     -fPIC "CMakeFiles/cmTryCompileExec.dir/testCCompiler.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Leaving directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+
+
+Determining size of void* passed with the following output:
+make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Entering directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+/System/Links/Executables/cmake -E cmake_progress_report /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o
+/System/Links/Executables/gcc  -g -O2      -o CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o   -c /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CheckTypeSize.c
+Linking C executable cmTryCompileExec
+/System/Links/Executables/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/System/Links/Executables/gcc   -g -O2     -fPIC "CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Leaving directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+
+
+Determining if the CXX compiler works passed with the following output:
+make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Entering directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+/System/Links/Executables/cmake -E cmake_progress_report /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o
+/System/Links/Executables/c++   -O2 -march=i686 -fomit-frame-pointer -pipe      -o CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o -c /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTryCompileExec
+/System/Links/Executables/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/System/Links/Executables/c++    -O2 -march=i686 -fomit-frame-pointer -pipe     -fPIC "CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Leaving directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file pthread.h exists passed with the following output:
+make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Entering directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+/System/Links/Executables/cmake -E cmake_progress_report /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o
+/System/Links/Executables/gcc  -g -O2      -o CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o   -c /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTryCompileExec
+/System/Links/Executables/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/System/Links/Executables/gcc   -g -O2     -fPIC "CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Leaving directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+
+
+Determining if the function pthread_create exists in the pthread passed with the following output:
+make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Entering directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+/System/Links/Executables/cmake -E cmake_progress_report /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckFunctionExists.o
+/System/Links/Executables/gcc  -g -O2   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTryCompileExec.dir/CheckFunctionExists.o   -c /Programs/CMake/2.4.7/share/cmake-2.4/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec
+/System/Links/Executables/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/System/Links/Executables/gcc   -g -O2   -DCHECK_FUNCTION_EXISTS=pthread_create  -fPIC "CMakeFiles/cmTryCompileExec.dir/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic -lpthread 
+make[1]: Leaving directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+
+
+The system is: Linux - 2.6.22.7-Gobo - unknown
+Determining if the C compiler is GNU succeeded with the following output:
+# 1 "/Programs/CMake/2.4.7/share/cmake-2.4/Modules/CMakeTestGNU.c"
+# 1 "/Users/lijon/Coding/AlgoScore/src/build.dbg//"
+# 1 "<built-in>"
+# 1 "<command line>"
+# 1 "/Programs/CMake/2.4.7/share/cmake-2.4/Modules/CMakeTestGNU.c"
+
+void THIS_IS_GNU();
+
+Determining if the C++ compiler is GNU succeeded with the following output:
+# 1 "/Programs/CMake/2.4.7/share/cmake-2.4/Modules/CMakeTestGNU.c"
+# 1 "<built-in>"
+# 1 "<command line>"
+# 1 "/Programs/CMake/2.4.7/share/cmake-2.4/Modules/CMakeTestGNU.c"
+
+void THIS_IS_GNU();
+
+Determining if the C compiler works passed with the following output:
+make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Entering directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+/System/Links/Executables/cmake -E cmake_progress_report /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/testCCompiler.o
+/System/Links/Executables/gcc  -O2 -g      -o CMakeFiles/cmTryCompileExec.dir/testCCompiler.o   -c /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/testCCompiler.c
+Linking C executable cmTryCompileExec
+/System/Links/Executables/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/System/Links/Executables/gcc   -O2 -g     -fPIC "CMakeFiles/cmTryCompileExec.dir/testCCompiler.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Leaving directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+
+
+Determining size of void* passed with the following output:
+make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Entering directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+/System/Links/Executables/cmake -E cmake_progress_report /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o
+/System/Links/Executables/gcc  -O2 -g      -o CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o   -c /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CheckTypeSize.c
+Linking C executable cmTryCompileExec
+/System/Links/Executables/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/System/Links/Executables/gcc   -O2 -g     -fPIC "CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Leaving directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+
+
+Determining if the CXX compiler works passed with the following output:
+make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Entering directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+/System/Links/Executables/cmake -E cmake_progress_report /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o
+/System/Links/Executables/c++   -O2 -march=i686 -fomit-frame-pointer -pipe      -o CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o -c /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTryCompileExec
+/System/Links/Executables/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/System/Links/Executables/c++    -O2 -march=i686 -fomit-frame-pointer -pipe     -fPIC "CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Leaving directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file pthread.h exists passed with the following output:
+make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Entering directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+/System/Links/Executables/cmake -E cmake_progress_report /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o
+/System/Links/Executables/gcc  -O2 -g      -o CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o   -c /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTryCompileExec
+/System/Links/Executables/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/System/Links/Executables/gcc   -O2 -g     -fPIC "CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Leaving directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+
+
+Determining if the function pthread_create exists in the pthread passed with the following output:
+make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Entering directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+/System/Links/Executables/cmake -E cmake_progress_report /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckFunctionExists.o
+/System/Links/Executables/gcc  -O2 -g   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTryCompileExec.dir/CheckFunctionExists.o   -c /Programs/CMake/2.4.7/share/cmake-2.4/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec
+/System/Links/Executables/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/System/Links/Executables/gcc   -O2 -g   -DCHECK_FUNCTION_EXISTS=pthread_create  -fPIC "CMakeFiles/cmTryCompileExec.dir/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic -lpthread 
+make[1]: Leaving directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+
+
+The system is: Linux - 2.6.22.7-Gobo - unknown
+Determining if the C compiler is GNU succeeded with the following output:
+# 1 "/Programs/CMake/2.4.7/share/cmake-2.4/Modules/CMakeTestGNU.c"
+# 1 "/Users/lijon/Coding/AlgoScore/src/build.dbg//"
+# 1 "<built-in>"
+# 1 "<command line>"
+# 1 "/Programs/CMake/2.4.7/share/cmake-2.4/Modules/CMakeTestGNU.c"
+
+void THIS_IS_GNU();
+
+Determining if the C++ compiler is GNU succeeded with the following output:
+# 1 "/Programs/CMake/2.4.7/share/cmake-2.4/Modules/CMakeTestGNU.c"
+# 1 "<built-in>"
+# 1 "<command line>"
+# 1 "/Programs/CMake/2.4.7/share/cmake-2.4/Modules/CMakeTestGNU.c"
+
+void THIS_IS_GNU();
+
+Determining if the C compiler works passed with the following output:
+make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Entering directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+/System/Links/Executables/cmake -E cmake_progress_report /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/testCCompiler.o
+/System/Links/Executables/gcc  -O2 -g      -o CMakeFiles/cmTryCompileExec.dir/testCCompiler.o   -c /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/testCCompiler.c
+Linking C executable cmTryCompileExec
+/System/Links/Executables/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/System/Links/Executables/gcc   -O2 -g     -fPIC "CMakeFiles/cmTryCompileExec.dir/testCCompiler.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Leaving directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+
+
+Determining size of void* passed with the following output:
+make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Entering directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+/System/Links/Executables/cmake -E cmake_progress_report /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o
+/System/Links/Executables/gcc  -O2 -g      -o CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o   -c /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CheckTypeSize.c
+Linking C executable cmTryCompileExec
+/System/Links/Executables/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/System/Links/Executables/gcc   -O2 -g     -fPIC "CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Leaving directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+
+
+Determining if the CXX compiler works passed with the following output:
+make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Entering directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+/System/Links/Executables/cmake -E cmake_progress_report /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o
+/System/Links/Executables/c++   -O2 -march=i686 -fomit-frame-pointer -pipe      -o CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o -c /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTryCompileExec
+/System/Links/Executables/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/System/Links/Executables/c++    -O2 -march=i686 -fomit-frame-pointer -pipe     -fPIC "CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Leaving directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file pthread.h exists passed with the following output:
+make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Entering directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+/System/Links/Executables/cmake -E cmake_progress_report /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o
+/System/Links/Executables/gcc  -O2 -g      -o CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o   -c /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTryCompileExec
+/System/Links/Executables/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/System/Links/Executables/gcc   -O2 -g     -fPIC "CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Leaving directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+
+
+Determining if the function pthread_create exists in the pthread passed with the following output:
+make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Entering directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+/System/Links/Executables/cmake -E cmake_progress_report /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckFunctionExists.o
+/System/Links/Executables/gcc  -O2 -g   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTryCompileExec.dir/CheckFunctionExists.o   -c /Programs/CMake/2.4.7/share/cmake-2.4/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec
+/System/Links/Executables/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/System/Links/Executables/gcc   -O2 -g   -DCHECK_FUNCTION_EXISTS=pthread_create  -fPIC "CMakeFiles/cmTryCompileExec.dir/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic -lpthread 
+make[1]: Leaving directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+
+
+The system is: Linux - 2.6.22.7-Gobo - unknown
+Determining if the C compiler is GNU succeeded with the following output:
+# 1 "/Programs/CMake/2.4.7/share/cmake-2.4/Modules/CMakeTestGNU.c"
+# 1 "/Users/lijon/Coding/AlgoScore/src/build.dbg//"
+# 1 "<built-in>"
+# 1 "<command line>"
+# 1 "/Programs/CMake/2.4.7/share/cmake-2.4/Modules/CMakeTestGNU.c"
+
+void THIS_IS_GNU();
+
+Determining if the C++ compiler is GNU succeeded with the following output:
+# 1 "/Programs/CMake/2.4.7/share/cmake-2.4/Modules/CMakeTestGNU.c"
+# 1 "<built-in>"
+# 1 "<command line>"
+# 1 "/Programs/CMake/2.4.7/share/cmake-2.4/Modules/CMakeTestGNU.c"
+
+void THIS_IS_GNU();
+
+Determining if the C compiler works passed with the following output:
+make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Entering directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+/System/Links/Executables/cmake -E cmake_progress_report /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/testCCompiler.o
+/System/Links/Executables/gcc  -O2 -g      -o CMakeFiles/cmTryCompileExec.dir/testCCompiler.o   -c /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/testCCompiler.c
+Linking C executable cmTryCompileExec
+/System/Links/Executables/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/System/Links/Executables/gcc   -O2 -g     -fPIC "CMakeFiles/cmTryCompileExec.dir/testCCompiler.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Leaving directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+
+
+Determining size of void* passed with the following output:
+make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Entering directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+/System/Links/Executables/cmake -E cmake_progress_report /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o
+/System/Links/Executables/gcc  -O2 -g      -o CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o   -c /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CheckTypeSize.c
+Linking C executable cmTryCompileExec
+/System/Links/Executables/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/System/Links/Executables/gcc   -O2 -g     -fPIC "CMakeFiles/cmTryCompileExec.dir/CheckTypeSize.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Leaving directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+
+
+Determining if the CXX compiler works passed with the following output:
+make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Entering directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+/System/Links/Executables/cmake -E cmake_progress_report /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building CXX object CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o
+/System/Links/Executables/c++   -O2 -march=i686 -fomit-frame-pointer -pipe      -o CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o -c /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTryCompileExec
+/System/Links/Executables/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/System/Links/Executables/c++    -O2 -march=i686 -fomit-frame-pointer -pipe     -fPIC "CMakeFiles/cmTryCompileExec.dir/testCXXCompiler.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Leaving directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+
+
+Determining if the include file pthread.h exists passed with the following output:
+make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Entering directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+/System/Links/Executables/cmake -E cmake_progress_report /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o
+/System/Links/Executables/gcc  -O2 -g      -o CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o   -c /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTryCompileExec
+/System/Links/Executables/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/System/Links/Executables/gcc   -O2 -g     -fPIC "CMakeFiles/cmTryCompileExec.dir/CheckIncludeFile.o"   -o cmTryCompileExec -rdynamic 
+make[1]: Leaving directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+
+
+Determining if the function pthread_create exists in the pthread passed with the following output:
+make -f CMakeFiles/cmTryCompileExec.dir/build.make CMakeFiles/cmTryCompileExec.dir/build
+make[1]: Entering directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+/System/Links/Executables/cmake -E cmake_progress_report /Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp/CMakeFiles 1
+Building C object CMakeFiles/cmTryCompileExec.dir/CheckFunctionExists.o
+/System/Links/Executables/gcc  -O2 -g   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTryCompileExec.dir/CheckFunctionExists.o   -c /Programs/CMake/2.4.7/share/cmake-2.4/Modules/CheckFunctionExists.c
+Linking C executable cmTryCompileExec
+/System/Links/Executables/cmake -P CMakeFiles/cmTryCompileExec.dir/cmake_clean_target.cmake
+/System/Links/Executables/gcc   -O2 -g   -DCHECK_FUNCTION_EXISTS=pthread_create  -fPIC "CMakeFiles/cmTryCompileExec.dir/CheckFunctionExists.o"   -o cmTryCompileExec -rdynamic -lpthread 
+make[1]: Leaving directory `/Users/lijon/Coding/AlgoScore/src/build.dbg/CMakeFiles/CMakeTmp'
+
+

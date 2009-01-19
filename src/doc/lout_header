@@ -1,0 +1,8 @@
+@SysInclude { tbl }
+@SysInclude { eq }
+@Include { lout_setup }
+@Document
+//
+@Text @Begin
+@Display { Bold 2f } @Font { AlgoScore users guide }
+@Display @I { Copyright 2008, Jonatan Liljedahl <lijon"@"kymatica.com> }

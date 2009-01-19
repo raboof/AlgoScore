@@ -1,0 +1,14 @@
+*.o
+.deps
+.libs
+autom4te.cache
+old
+*.old
+CVS
+old_autotools
+build
+build.lijon
+AlgoScore/algoscore
+algoscore-manual.pdf
+*~
+

@@ -1,0 +1,24 @@
+o1 = score.new_obj_by_name("cs_ftab");
+o1.set_prop("height", 100);
+o1.set_prop("parms", [ 1, 0, 512, 21, 7, 1 ]);
+o1.set_prop("start", 1.699735449735439);
+o1.set_prop("ypos", 525);
+o1.set_prop("width", 400);
+o0 = score.new_obj_by_name("cs_ftab");
+o0.set_prop("height", 100);
+o0.set_prop("parms", [ 2, 0, 512, 10, 100, 50, 25, 12, 6, 3, 1.5, 0.75, 0.3 ]);
+o0.set_prop("start", 1.967592592592596);
+o0.set_prop("ypos", 765);
+o0.set_prop("width", 200);
+o2 = score.new_obj_by_name("csound");
+o2.set_prop("height", 10);
+o2.set_prop("start", 0.5687830687830715);
+o2.set_prop("ypos", 660);
+o2.set_prop("length", 14.58333333333333);
+o2.set_prop("orc_file", 'test.orc');
+o2.query_inlets();
+c = o2.connect(o0,"out","ftable",4.3452380952381);
+c.set_prop("transfer func", '');
+c = o2.connect(o1,"out","ftable",4.226190476190479);
+c.set_prop("transfer func", '');
+score.marks = [ { type : 'end', time : 15.33682917611489 } ]

@@ -1,0 +1,155 @@
+
+= Building on Mac OS X =[osxbuild]
+Compiling AlgoScore on OS X should be easy as long as you have the necessary
+dependencies installed.
+
+The instructions below should create a universal binary (running on both
+PPC and Intel). To make a non-universal
+binary, ignore the ``+universal`` flags to port install and comment out
+the ``set (CMAKE_OSX_ARCHITECTURES ppc;i386 )`` line in src/CMakeLists.txt.
+
+== Dependencies ==
+Except for the already mentioned [run-time dependencies #osxinstall]
+you need to install the following packages, needed for the build process:
+
+- [XCodeTools #xcode]
+- [MacPorts #macports]
+  - [cmake #cmake] (build-dependency only)
+  - [gtk2 #gtk]
+  - [libsndfile #libsndfile]
+  - liblo (optional, for OSC support)
+  - pcre (optional)
+
+
+If you already have an old MacPorts installed, please run
+``sudo port selfupdate`` now.
+
+=== Build the dependencies ===
+Open a terminal and do:
+```
+sudo port install cmake
+sudo port install liblo +universal
+sudo port install libsndfile +universal
+sudo port install gtk2 +quartz +no_x11 +universal
+```
+Note that gtk2 may take a couple of hours to compile!
+
+If the ``port`` command could not be found, it might be because 
+some versions of MacPorts fails to set up your shell variables, try this in a Terminal
+to fix it:
+``` curl -Lo postflight http://tinyurl.com/2qqbth && bash postflight
+Then restart Terminal for the new variables to take effect.
+
+=== PCRE trouble ===
+Currently it seems that the PCRE port does not work with +universal, PCRE is not needed
+for AlgoScore to work so you can safely ignore this. 
+
+%If you want to try and build it anyhow, you
+%also need to patch the portfile to avoid the readline support:
+%```
+%--- /opt/local/var/macports/sources/rsync.macports.org/release/ports/devel/pcre/Portfile        2008-10-10 12:42:48.000000000 +0200
+%+++ /Users/user/pcre_newportfile        2008-11-02 04:32:11.000000000 +0100
+%@@ -29,11 +29,11 @@
+%                 sha1    552909f9d18e1954eec639f926957a4cb2de1ec3 \
+%                 rmd160  f8cc336f984bce9bfebaef27e6376d84845bce8f
+% 
+%-depends_lib     port:readline
+%+# depends_lib     port:readline
+% 
+% configure.args  --docdir=${prefix}/share/doc/${name}-${version} \
+%                 --enable-unicode-properties \
+%-                --enable-pcretest-libreadline
+%+#                --enable-pcretest-libreadline
+% 
+% post-configure {
+%     if {![variant_isset doc]} {
+%```
+
+=== GTK trouble ===
+ATK might not build with +universal, if not then add these lines to the ATK portfile at
+/opt/local/var/macports/sources/rsync.macports.org/release/ports/devel/atk/Portfile
+```
+platform darwin 8 { 
+  configure.env-append    MACOSX_DEPLOYMENT_TARGET=10.4 
+  build.env-append        MACOSX_DEPLOYMENT_TARGET=10.4 
+}
+
+```
+and try again...
+
+=== Make a universal CsoundLib ===
+CsoundLib needs to be made universal if building a universal AS. 
+
+- Get CsoundLib from the other platforms package (ppc if you're on i386, etc...),
+it's in /Library/Frameworks/CsoundLib.framework/Versions/Current/CsoundLib.
+NOTE: You can extract the file by unpacking ``CsoundLib.pkg/Contents/Archive.pax.gz`` instead of
+finding another machine or installing a package for the wrong platform on your own machine.
+- Name the original one ``CsoundLib.1`` and the other one ``CsoundLib.2``
+- Use lipo to create a universal:
+```
+$ sudo lipo -create CsoundLib.1 CsoundLib.2 -output CsoundLib
+```
+- Check that it worked:
+```
+$ cd /Library/Frameworks/CsoundLib.framework/Versions/Current/         
+$ file CsoundLib
+CsoundLib: Mach-O universal binary with 2 architectures
+CsoundLib (for architecture i386):      Mach-O dynamically linked shared library i386
+CsoundLib (for architecture ppc):       Mach-O dynamically linked shared library ppc
+```
+- Replace the libsndfile shipped with csound with a link to the universal one you built yourself:
+```
+$ ln -sf /opt/local/lib/libsndfile.1.0.17.dylib /usr/local/lib/libsndfile.1.0.17.dylib
+```
+
+
+== Configure and build ==
+Now enter the unpacked AS folder and build it:
+```
+cd AlgoScore/src
+source setup_osx_env.sh
+./make_build
+```
+
+There will be a couple of warnings regarding architecture mismatch, ignore these as long as it all
+ends with a line saying ``[100%] Built target algoscore``...
+
+If you want to make a clean rebuild, remove the old ``build`` folder first.
+
+% You need to tell the configure
+% script what version of Jack you're using:
+%
+% For 0.105.0 or later:
+% ``` $ ./configure HAVE_STABLE_JACK_MIDI=yes
+%
+% For 0.102.27 to 0.104.0:
+% ``` $ ./configure HAVE_OLD_JACK_MIDI=yes
+%
+% If you have an older Jack, don't pass any variable and MIDI support will be
+% disabled.
+%
+% Now simply do:
+% ``` $ ./make_build
+
+== Testing the binary ==
+If the build succeeded without errors you should be able to test AS:
+```
+cd AlgoScore
+./algoscore
+```
+
+== Make an Application bundle ==
+
+If you were able to run the resulting binary, you probably want to create a
+stand-alone clickable application bundle so that you don't need to bother with
+the Terminal:
+```
+cd AlgoScore/src/macosx
+./make_app
+```
+The resulting package should show up as ``AlgoScore/src/macosx/AlgoScore.app``,
+which you can move to some good place and put in your dock.
+
+Note that all dependencies except the already mentioned
+[run-time dependencies #osxinstall] gets embedded in the AS.app application
+bundle and does not need to be installed for the AS.app to run.

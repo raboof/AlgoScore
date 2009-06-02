@@ -26,6 +26,8 @@
 #include <time.h>
 #include <glib.h>
 
+#include <dlfcn.h>
+
 #include "nasal.h"
 #include "utils.h"
 //#include "watchdog.h"
@@ -208,6 +210,19 @@ static naRef f_set_printerr_handler(naContext c, naRef me, int argc, naRef* args
     return naNil();
 }
 
+static naRef f_load_plugin(naContext c, naRef me, int argc, naRef* args) {
+    naRef ns = naNil();
+    void *handle = dlopen(naStr_data(args[0]),RTLD_LAZY);
+    if(handle) {
+        naRef (*init_func)(naContext);
+        init_func = dlsym(handle, "init_nasal_namespace");
+        if(init_func!=NULL) {
+            ns = init_func(c);
+        }
+    }
+    return ns;
+}
+
 /*
 gboolean algoscore_idle_proc(gpointer data) {
     return TRUE;
@@ -293,6 +308,7 @@ int main(int argc, char** argv)
 //    F(wd_init);
 //    F(wd_feed);
 //    F(wd_set_current);
+    F(load_plugin);
 #ifdef MAC_INTEGRATION
     F(ige_mac_menu_set_menu_bar);
     F(ige_mac_menu_set_quit_menu_item);

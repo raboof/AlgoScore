@@ -1,3 +1,8 @@
+- Plugin support:
+  import(modname) now looks for a modname.so shared library plugin and
+  imports all symbols returned by init_nasal_namespace(). This means
+  that third party nasal libraries and algoscore classes can be used.
+
 - Updates to AlgoScore Users Manual, added some information to
   the "Internals" section.
 
@@ -14,7 +19,6 @@
   'outlets' property which is a table of outlet names and their
   interpolate flag. The outlet asked for is available in the 'outlet'
   variable. Example: "{out1:x*10,out2:x/2}[outlet]"
-  For each outlet, an 'out.interpolate' property is created.
 
 - The 'funcbus' class now sets the 'ev' variable to the value of
   the actual event when a target object asks for an event by index.

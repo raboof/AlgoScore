@@ -97,6 +97,10 @@ GDB: handle SIG33 nostop noprint pass
   compatible if out was used as an output? (if out contains a vector
   named 'data', use compatibility mode)
 
+* direct access to csound DSP graph? then subparts of an instrument could
+  be connected in the score.. like envelopes and oscillator, etc..
+  Or pair graphical symbols with csound instr snippets?
+
 * Put filename in Score class and current score in globals.
 
 * See if there are more places that could benefit from using

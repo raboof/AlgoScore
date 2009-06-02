@@ -151,24 +151,30 @@ var run_file = func(file, syms=nil, args=nil) {
 
 var module_stat = {};
 
+var find_mod = func(mod, prefdir, ext) {
+    var file = nil;
+    var check = prefdir ~ "/" ~ mod ~ ext;
+    if(io.stat(check) != nil) {
+        file = check;
+    } else {
+        foreach(dir; module_path) {
+            check = dir ~ "/" ~ mod ~ ext;
+            if(io.stat(check) != nil) {
+                file = check;
+                break;
+	        }
+        }
+    }
+    return file;
+}
+
 # Locates a module file, runs and loads it
 var load_mod = func(mod, prefdir) {
-    var file = nil;
-    var check = prefdir ~ "/" ~ mod ~ ".nas";
-    if(io.stat(check) != nil) {
-	file = check;
-    } else {
-	foreach(dir; module_path) {
-	    check = dir ~ "/" ~ mod ~ ".nas";
-	    if(io.stat(check) != nil) {
-		file = check;
-		break;
-	    }
-	}
-    }
+    var dlfile = find_mod(mod, prefdir, ".so");
+    var file = find_mod(mod, prefdir, ".nas");
     var iscore = contains(core_modules, mod);
-    if(file == nil and !iscore) die("cannot find module: " ~ mod);
-    var syms = iscore ? core_modules[mod] : {};
+    if(file == nil and dlfile == nil and !iscore) die("cannot find module: " ~ mod);
+    var syms = iscore ? core_modules[mod] : (dlfile != nil ? load_plugin(dlfile) : {});
     if(file != nil) run_file(file, syms);
 
     # save the mtime for later checks...
@@ -178,17 +184,19 @@ var load_mod = func(mod, prefdir) {
     # EXPORT list or the shallow, non-internal, non-special symbols.
     var modexp = {};
     if(contains(syms, "EXPORT") and typeof(syms["EXPORT"]) == "vector") {
-	foreach(s; syms["EXPORT"])
-	    if(contains(syms, s))
-    	        modexp[s] = syms[s];
+        foreach(s; syms["EXPORT"]) {
+            if(contains(syms, s)) {
+                modexp[s] = syms[s];
+            }
+        }
     } else {
-	foreach(k; keys(syms)) {
-	    if(typeof(k) != "scalar" or size(k) == 0) continue;
-	    if(k[0] == `_` or k == "arg" or k == "EXPORT") continue;
-	    if(typeof(syms[k]) == "hash") continue;
-	    if(typeof(syms[k]) == "vector") continue;
-	    modexp[k] = syms[k];
-	}
+    	foreach(k; keys(syms)) {
+    	    if(typeof(k) != "scalar" or size(k) == 0) continue;
+    	    if(k[0] == `_` or k == "arg" or k == "EXPORT") continue;
+    	    if(typeof(syms[k]) == "hash") continue;
+    	    if(typeof(syms[k]) == "vector") continue;
+    	    modexp[k] = syms[k];
+    	}
     }
     loaded_modules[mod] = modexp;
 }
@@ -205,19 +213,19 @@ var module_changed = func(mod) {
 # This is the function exposed to users.
 var import = func(mod, imports...) {
     if(!contains(loaded_modules, mod) or module_changed(mod)) {
-	var callerfile = caller()[2];
-	load_mod(mod, dirname(callerfile));
+        var callerfile = caller()[2];
+        load_mod(mod, dirname(callerfile));
     }
     var caller_locals = caller()[0];
     var module = clone_hash(loaded_modules[mod]);
     caller_locals[mod] = module;
     if(size(imports) == 1 and imports[0] == "*") {
-	foreach(sym; keys(module)) caller_locals[sym] = module[sym];
+        foreach(sym; keys(module)) caller_locals[sym] = module[sym];
     } else {
-	foreach(sym; imports) {
-	    if(contains(module, sym)) caller_locals[sym] = module[sym];
-	    else die(sprintf("No symbol '%s' in module '%s'", sym, mod));
-	}
+        foreach(sym; imports) {
+            if(contains(module, sym)) caller_locals[sym] = module[sym];
+            else die(sprintf("No symbol '%s' in module '%s'", sym, mod));
+        }
     }
 }
 

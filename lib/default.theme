@@ -1,11 +1,11 @@
 gtk-error-bell = 0
 
 style "monofont" {
-    font_name = "Mono"
+    font_name = "Mono 8"
 }
 
 style "bigmono" {
-    font_name = "Mono 16"
+    font_name = "Mono 14"
 }
 
 style "tool_label" {

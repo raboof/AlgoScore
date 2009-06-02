@@ -1,11 +1,11 @@
 gtk-error-bell = 0
 
 style "monofont" {
-    font_name = "Mono 10"
+    font_name = "Mono 8"
 }
 
 style "bigmono" {
-    font_name = "Mono 16"
+    font_name = "Mono 14"
 }
 
 style "tool_label" {
@@ -93,7 +93,7 @@ style "default" {
     text[ACTIVE] = "#ffffff"
     text[INSENSITIVE] = "#505050"
     GtkWidget::cursor-color = "#ffffff"
-    font_name = "Sans 10"
+#    font_name = "Sans 10"
 }
 
 gtk-toolbar-icon-size = small-toolbar

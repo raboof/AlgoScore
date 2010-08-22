@@ -97,7 +97,7 @@ else ()
     message (STATUS "${midi_msg} stable")
 endif ()
 
-pkg_check_modules (LIBLO liblo>=0.24)
+pkg_check_modules (LIBLO liblo>=0.23)
 
 if (LIBLO_FOUND)
     message (STATUS "OSC support enabled")

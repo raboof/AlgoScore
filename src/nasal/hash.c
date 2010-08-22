@@ -116,9 +116,9 @@ static void hashset(HashRec* hr, naRef key, naRef val)
 
 static int recsize(int lgsz)
 {
-    HashRec hr;
-    hr.lgsz = lgsz;
-    return (int)((char*)&TAB(&hr)[POW2(lgsz+1)] - (char*)&hr);
+    int psz = sizeof(void*);
+    int hdrsz = psz * (sizeof(HashEnt) + psz-1)/psz;
+    return hdrsz + sizeof(HashEnt)*POW2(lgsz) + sizeof(int)*POW2(lgsz+1);
 }
 
 static HashRec* resize(struct naHash* hash)
@@ -199,7 +199,8 @@ void naiGCMarkHash(naRef hash)
 static void tmpStr(naRef* out, struct naStr* str, const char* key)
 {
     str->type = T_STR;
-    str->hashcode = str->emblen = 0;
+    str->hashcode = 0;
+    str->emblen = -1;
     str->data.ref.ptr = (unsigned char*)key;
     str->data.ref.len = strlen(key);
     SETPTR(*out, str);

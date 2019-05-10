@@ -1,7 +1,0 @@
-#!/bin/sh
-COMMON_OPTS="--unsafe -a quirks! -a theme=as -a stylesdir=$PWD"
-DESTDIR="../../Help"
-asciidoc $COMMON_OPTS -a toc -a numbered algoscore-manual.txt
-mv algoscore-manual.html $DESTDIR
-asciidoc $COMMON_OPTS algoscore-intro.txt
-mv algoscore-intro.html $DESTDIR

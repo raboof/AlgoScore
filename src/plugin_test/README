@@ -1,7 +1,0 @@
-This demonstrates how one can create dynamically loaded plugins for AlgoScore.
-Run 'make' to build the foo.so plugin, then move it to some place where AlgoScore looks for
-modules, like ~/algoscore_data/lib and restart AlgoScore.
-
-To load the plugin, use import("foo") as usual. If a "foo.nas" nasal module also exists, it will
-be loaded ontop of the plugin, thus it can use any symbols defined in foo.so.
-

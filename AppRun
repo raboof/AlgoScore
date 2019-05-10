@@ -1,6 +1,0 @@
-#!/bin/sh
-cd "$(dirname "$0")"
-[ -x ./algoscore ] || xterm -e sh -c \
-"cd src && ./make_build ; echo Press ENTER... ; read"
-exec ./algoscore "$@"
-

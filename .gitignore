@@ -1,3 +1,7 @@
-/src/CMakeCache.txt
-/src/CMakeFiles/
-
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+CMakeFiles
+config.h
+libnasal.a
+/algoscore

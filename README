@@ -27,6 +27,8 @@ dependencies:
 - PCRE (optional)
 - LibLO (optional, for OSC support)
 
+On Debian, try "apt-get install libgtk2.0-dev libcsound64-dev libsndfile1-dev"
+
 There's no need to 'install' AlgoScore, it's a self-contained application
 directory. Start AlgoScore by running the AppRun script, or running the
 algoscore binary from within the top-level directory of the AlgoScore folder.

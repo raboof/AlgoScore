@@ -182,7 +182,8 @@ static naRef f_set_graph_callback(naContext ctx, naRef me, int argc, naRef *args
 //    printf("setting graph callback, tag %d\n",tag);
 //    naHash_set(graph_cb,naNum(data->tag),FUNCARG(1));
     data->graph_cb = FUNCARG(1);
-    csoundPreCompile(cs);
+    // No longer needed (http://csound.1045644.n5.nabble.com/remove-csoundPreCompile-td5669752.html)
+    //csoundPreCompile(cs);
     csoundSetIsGraphable(cs,1);
     csoundSetDrawGraphCallback(cs,graph_wrapper);
     return naNil();
@@ -230,7 +231,7 @@ static naRef f_create(naContext ctx, naRef me, int argc, naRef *args) {
     HostData *data;
     
     if(!cs_initialized) {
-        csoundInitialize(0,0,0);
+        csoundInitialize(0);
         cs_initialized=1;
     }
 
@@ -243,7 +244,7 @@ static naRef f_create(naContext ctx, naRef me, int argc, naRef *args) {
     CSOUND *cs = csoundCreate((void*)data);
 //    CSOUND *cs = csoundCreate((void*)tag);
     csoundSetMessageCallback(cs, csound_msg);
-    csoundSetOutputValueCallback(cs, outvalue_cb);
+    // TODO FIXME no longer available in csound 6 csoundSetOutputValueCallback(cs, outvalue_cb);
     return newCsoundGhost(ctx,cs);
 }
 
@@ -332,11 +333,11 @@ static naRef f_get_score_time(naContext ctx, naRef me, int argc, naRef *args) {
 
 static naRef f_list_channels(naContext ctx, naRef me, int argc, naRef *args) {
     CSOUND *cs = CSOUNDARG(0);
-    CsoundChannelListEntry *lst;
+    controlChannelInfo_t *lst;
     int i, chans = csoundListChannels(cs, &lst);
     naRef v = naNewVector(ctx);
     for(i=0;i<chans;i++) {
-        CsoundChannelListEntry *ch = &lst[i];
+        controlChannelInfo_t *ch = &lst[i];
         naRef h = naNewHash(ctx);
         char *t;
         switch(ch->type & CSOUND_CHANNEL_TYPE_MASK) {

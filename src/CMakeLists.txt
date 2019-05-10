@@ -145,6 +145,7 @@ set (SOURCES
 add_executable (algoscore ${SOURCES})
 target_link_libraries (algoscore
     nasal
+    m
     ${CMAKE_THREAD_LIBS_INIT}
     ${GTK_LIBRARIES}
     ${SNDFILE_LIBRARIES}

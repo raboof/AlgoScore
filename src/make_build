@@ -1,4 +1,2 @@
 #!/bin/sh
-mv -f ../algoscore ../algoscore.old 2>/dev/null
-mkdir build 2>/dev/null
-cd build && cmake .. && make
+cmake . && make

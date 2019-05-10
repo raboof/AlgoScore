@@ -5,10 +5,8 @@ By Jonatan Liljedahl <lijon@kymatica.com>
 Algoscore is a graphical environment for algorithmic composition,
 where music is constructed directly in an interactive graphical score.
 
-For more information and downloads, see http://kymatica.com/algoscore
-
 For full documentation, see the AlgoScore Users Guide at
-http://download.gna.org/algoscore/Help/algoscore-manual.html
+https://raboof.github.io/AlgoScore/algoscore-manual.html
 
 AlgoScore is released under the GNU General Public License v3 or later,
 see COPYING for more information.

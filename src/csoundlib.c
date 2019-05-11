@@ -194,8 +194,8 @@ void outvalue_cb(CSOUND *cs, const char *chan, void *channelValuePtr, const void
 //    int tag = (int) csoundGetHostData(cs);
     static float event_id = 0.0;
     //NOTE: this static event_id needs to be moved to host data..
-    float *floatValPtr = (float*)channelValuePtr;
-    float val = *floatValPtr;
+    MYFLT *floatValPtr = (MYFLT *)channelValuePtr;
+    MYFLT val = *floatValPtr;
 
     if(strcmp(chan,"tag")==0) event_id = val;
     else {

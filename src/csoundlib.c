@@ -189,11 +189,13 @@ static naRef f_set_graph_callback(naContext ctx, naRef me, int argc, naRef *args
     return naNil();
 }
 
-void outvalue_cb(CSOUND *cs, const char *chan, MYFLT val) {
+void outvalue_cb(CSOUND *cs, const char *chan, void *channelValuePtr, const void *channelType) {
     HostData *data = (HostData*) csoundGetHostData(cs);
 //    int tag = (int) csoundGetHostData(cs);
     static float event_id = 0.0;
     //NOTE: this static event_id needs to be moved to host data..
+    float *floatValPtr = (float*)channelValuePtr;
+    float val = *floatValPtr;
 
     if(strcmp(chan,"tag")==0) event_id = val;
     else {
@@ -226,7 +228,7 @@ void outvalue_cb(CSOUND *cs, const char *chan, MYFLT val) {
 }
 
 static naRef f_create(naContext ctx, naRef me, int argc, naRef *args) {
-    static cs_initialized=0;
+    static int cs_initialized=0;
 //    int tag = NUMARG(0);
     HostData *data;
     
@@ -244,7 +246,7 @@ static naRef f_create(naContext ctx, naRef me, int argc, naRef *args) {
     CSOUND *cs = csoundCreate((void*)data);
 //    CSOUND *cs = csoundCreate((void*)tag);
     csoundSetMessageCallback(cs, csound_msg);
-    // TODO FIXME no longer available in csound 6 csoundSetOutputValueCallback(cs, outvalue_cb);
+    csoundSetOutputChannelCallback(cs, outvalue_cb);
     return newCsoundGhost(ctx,cs);
 }
 
